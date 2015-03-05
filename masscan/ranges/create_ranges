@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+import requests
+
+http1 = requests.get('http://www.nirsoft.net/countryip/')
+for line in http1.content.split('\n'):
+    if '<td><a href="' in line:
+	url = 'http://www.nirsoft.net/countryip/'
+	url += line.split('href="')[1].split('">')[0]
+	country = line.split('.html">')[1].split('</a>')[0]
+	f = open(country.replace(' ', '_'), 'w+')
+	http2 = requests.get(url)
+	for line in http2.content.split('\n'):
+	    if '<tr> <td>' in line:
+		for row in line.split('<tr> <td>'): 
+		    if ' <td>' in row:
+		    	column = row.split(' <td>')
+			f.write('%s-%s\n' % (column[0], column[1]))
+	f.close()

@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+import socket
+import argparse
+
+def Touch_Ftp(fname):
+    for line in open(fname, 'r'):
+        if line.startswith('banner'):
+            try:
+                ip = line.split('banner tcp 21 ')[1].split(' ')[0]
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((ip, 21))
+                s.recv(256)
+                s.send('USER anonymous\r\n')
+                s.recv(256)
+                s.send('PASS \r\n')
+                print ip, s.recv(256).replace('\n', '')
+                s.close()
+            except:pass
+
+if __name__ == '__main__':
+    parse = argparse.ArgumentParser()
+    parse.add_argument('file', help='masscan output file')
+    args = parse.parse_args()
+    Touch_Ftp(args.file)

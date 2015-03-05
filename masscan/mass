@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]
+then
+	echo -e "\n\tUsage: <port> <rate> <range_file> <output>\n"
+else
+	sudo masscan -p $1 --banners --rate $2 -iL $3 --exclude "255.255.255.255" --http-user-agent "Mozilla/5.0 (Windows NT 6.3; WOW64)" -oL $4 --connection-timeout 100 --capture html
+fi
