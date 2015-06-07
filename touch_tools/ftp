@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+import re
+import os
+import socket
+import argparse
+from parse_masscan import Parse_Masscan
+from nmap_service_probe import Nmap_Service_Probe
+
+def Touch_Ftp(mass, timeout, nmap):
+    pm = Parse_Masscan()
+    nsp = Nmap_Service_Probe()
+    nsp.parse(os.path.join(nmap, 'nmap-service-probes'))
+    banners = nsp.get_service('ftp')
+    for node in pm.parse(mass):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(int(timeout))
+        try:
+            s.connect((node['ip'], int(node['port'])))
+            parse_banner(s.recv(256), banners)
+        except:pass
+        s.close()
+
+def parse_banner(response, banners):
+    for banner in banners:
+        print banner['regex_flag']
+    print response
+
+if __name__ == '__main__':
+    parse = argparse.ArgumentParser()
+    parse.add_argument('mass', help='masscan output file')
+    parse.add_argument('--nmap', default="/home/ssem/tools/nmap/",
+        help='location of nmap source')
+    parse.add_argument('-t', default=10, help="connection timeout (DEFAULT:10)")
+    args = parse.parse_args()
+    Touch_Ftp(args.mass, args.t, args.nmap)
