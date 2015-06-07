@@ -1,66 +1,114 @@
-#!/bin/bash
+#!/usr/bin/env python
+import os
+import re
+import sys
+import argparse
 
-DIR="/mnt/movies/other/pastebin/"
-IN=`cat $@`
+def run(stream, output):
+    for line in stream:
+        print '#', line
+        look_for_hashes(line, output)
+        look_for_credit_cards(line, output)
+        look_for_other(line, output)
 
-# credit cards
-#echo ${IN} | egrep -o '\b4[0-9]{3}[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{1}[0-9]{3}?\b' >> ${DIR}visa.txt
-#echo ${IN} | egrep -o '\b5[1-5][0-9]{2}[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{4}\b' >> ${DIR}mastercard.txt
-#echo ${IN} | egrep -o '\b3[47][0-9]{2}[ -]?[0-9]{6}[ -]?[0-9]{5}\b' >> ${DIR}americal-express.txt
-#echo ${IN} | egrep -o '\b3(0[0-5]|[68][0-9])[0-9]{1}[0-9]{6}[0-9]{4}\b' >> ${DIR}diners_club.txt
-#echo ${IN} | egrep -o '\b6(011|5[0-9]{2})[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{4}\b' >> ${DIR}discover.txt
-#echo ${IN} | egrep -o '\b(2131|1800|35[0-9]{2})[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{3,4}\b' >> ${DIR}jcb.txt
+def look_for_hashes(line, output):
+    save_result('rawmd5-rawmd4-nt-lotus5', re.finditer('^\w{32}($|\s)', line), output)
+    save_result('rawsha1-ripemd160-mysqlsha1', re.finditer('^\w{40}($|\s)', line), output)
+    save_result('mysql-pixmd5-lm', re.finditer('^\w{16}($|\s)', line), output)
+    save_result('mysqlsha1', re.finditer('\w*:\*\w{40}($|\s)', line), output)
+    save_result('phpass', re.finditer('\$[P|H]\$\S{31}($|\s)', line), output)
+    save_result('freebsdmd5', re.finditer('\$1\$\w{8}\$\S{22}($|\s)', line), output)
+    save_result('mscashsalt', re.finditer('^\w{32}:\S*($|\s)', line), output)
+    save_result('mscashsalt2', re.finditer('M\$\S*\#\w{32}:\S*($|\s)', line), output)
+    save_result('mscash', re.finditer('M\$\S*\#\w{32}($|\s)', line), output)
+    save_result('rawsha256ghost', re.finditer('^\w{64}($|\s)', line), output)
+    save_result('descrypt', re.finditer('^\S{13}($|\s)', line), output)
+    save_result('descryptuser', re.finditer('^\w*:\S{13}($|\s)', line), output)
+    save_result('md5crypt', re.finditer('\$apr1\$\w{8}\$\S{22}($|\s)', line), output)
+    save_result('whirlpool', re.finditer('^\w{128}($|\s)', line), output)
+    save_result('sha512crypt', re.finditer('\$6\$\w*\$\S{86}($|\s)', line), output)
+    save_result('mscash2', re.finditer('\$DCC2\$10240\#\w*\#\w{32}($|\s)', line), output)
+    save_result('lm', re.finditer('\$LM\$\w{16}($|\s)', line), output)
+    save_result('oraclesalt', re.finditer('^\w{16}:\w*($|\s)', line), output)
+    save_result('oraclesalt2', re.finditer('^O\$\w*\#\w{16}($|\s)', line), output)
+    save_result('oracleuser', re.finditer('^\w+:O\$\w*\#\w{16}($|\s)', line), output)
+    save_result('bcrypt', re.finditer('\$2a\$\w*\$\S{53}($|\s)', line), output)
+    save_result('sunmd5', re.finditer('\$md5\$rounds=\w*\$\S{39}($|\s)', line), output)
+    save_result('netntlm', re.finditer('u4-netntlm::\w*:\S{114}($|\s)', line), output)
+    save_result('netntlmv2', re.finditer('\w*::\w*:\S{156}($|\s)', line), output)
+    save_result('aizsmd5', re.finditer('\{smd5\}\S{31}($|\s)', line), output)
+    save_result('aixssha256', re.finditer('\{ssha256\}\S{63}($|\s)', line), output)
+    save_result('aixssha512', re.finditer('\{ssha512\}\S{106}($|\s)', line), output)
+    save_result('aixssha1', re.finditer('\{ssha1\}\S{47}($|\s)', line), output)
+    save_result('forigate', re.finditer('^\w{47}($|\s)', line), output)
+    save_result('pbkdf2hmacsha512', re.finditer('\$\w*\$\w*\$\w{128}($|\s)', line), output)
+    save_result('pbkdf2hmacsha512',
+        re.finditer('grub.pbkdf2.sha512.\w*.\S{257}($|\s)', line),
+        output)
+    save_result('lotus85', re.finditer('^\w{130}($|\s)', line), output)
+    save_result('sha256crypt', re.finditer('\$5\Srounds=\w*\$\S{60}($|\s)', line), output)
+    save_result('sapb', re.finditer('^\w*\$\w{16}($|\s)', line), output)
+    save_result('sapg', re.finditer('^\w*\$\w{40}($|\s)', line), output)
+    save_result('drupal7', re.finditer('\$S\$\S{52}($|\s)', line), output)
+    save_result('sybasease', re.finditer('^\w{86}($|\s)', line), output)
+    save_result('citrixns10', re.finditer('^\w{49}($|\s)', line), output)
+    save_result('racf', re.finditer('\$racf\$\*\w*\*\w{16}($|\s)', line), output)
+    save_result('pbkdf2hmacsha256', re.finditer('\$8\$\S{58}($|\s)', line), output)
+    save_result('office',
+        re.finditer('\$office\$\*20(07|10|13)\*\w*\*\w*\*\w*\*(\S{106}|\S{130})($|\s)', line),
+        output)
+    save_result('oldoffice', re.finditer('\$oldoffice\$\w*\*(\S{98}|\S{106})($|\s)', line), output)
+    save_result('rawsha384', re.finditer('^\w{96}($|\s)', line), output)
 
-# other
-#echo ${IN} | egrep -o '\b[0-9]{3}[ -]{1}[0-9]{2}[ -]{1}[0-9]{4}\b' > ${DIR}ssn.txt
-echo ${IN} | egrep -o '\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b' >> ${DIR}email.txt
+def look_for_credit_cards(line, output):
+    save_result('visa',
+        re.finditer('\b4[0-9]{3}[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{1}[0-9]{3}?\b', line),
+        output)
+    save_result('mastercard',
+        re.finditer('\b5[1-5][0-9]{2}[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{4}\b', line),
+        output)
+    save_result('americal-express',
+        re.finditer('\b3[47][0-9]{2}[ -]?[0-9]{6}[ -]?[0-9]{5}\b', line),
+        output)
+    save_result('diners_club',
+        re.finditer('\b3(0[0-5]|[68][0-9])[0-9]{1}[0-9]{6}[0-9]{4}\b', line),
+        output)
+    save_result('discover',
+        re.finditer('\b6(011|5[0-9]{2})[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{4}\b', line),
+        output)
+    save_result('jcb',
+        re.finditer('\b(2131|1800|35[0-9]{2})[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{3,4}\b', line),
+        output)
 
-#hashes
-echo ${IN} | egrep -o '^\w{32}($|\s)' >> ${DIR}md5_raw-md4_nt_lotus5.txt
-echo ${IN} | egrep -o '^\w{40}($|\s)' >> ${DIR}raw-sha1_ripemd-160_mysql-sha1.txt
-echo ${IN} | egrep -o '^\w{16}($|\s)' >> ${DIR}mysql_pix-md5_lm.txt
-echo ${IN} | egrep -o '\w*:\*\w{40}($|\s)' >> ${DIR}mysql-sha1.txt
-echo ${IN} | egrep -o '\$[P|H]\$\S{31}($|\s)' >> ${DIR}phpass.txt
-echo ${IN} | egrep -o '\$1\$\w{8}\$\S{22}($|\s)' >> ${DIR}raw-md5.txt
-echo ${IN} | egrep -o '^\w{32}:\S*($|\s)' >> ${DIR}mscash_salt.txt
-echo ${IN} | egrep -o 'M\$\S*\#\w{32}:\S*($|\s)' >> ${DIR}mscash_salt2.txt
-echo ${IN} | egrep -o 'M\$\S*\#\w{32}($|\s)' >> ${DIR}mscash.txt
-echo ${IN} | egrep -o '^\w{64}($|\s)' >> ${DIR}raw-sha256_ghost.txt
-echo ${IN} | egrep -o '^\S{13}($|\s)' >> ${DIR}descrypt.txt
-echo ${IN} | egrep -o '^\w*:\S{13}($|\s)' >> ${DIR}descrypt_user.txt
-echo ${IN} | egrep -o '\$apr1\$\w{8}\$\S{22}($|\s)' >> ${DIR}md5crypt.txt
-echo ${IN} | egrep -o '^\w{128}($|\s)' >> ${DIR}raw-sha512_whirlpool.txt
-echo ${IN} | egrep -o '\$6\$\w*\$\S{86}($|\s)' >> ${DIR}sha512crypt.txt
-echo ${IN} | egrep -o '\$DCC2\$10240\#\w*\#\w{32}($|\s)' >> ${DIR}mscash2.txt
-echo ${IN} | egrep -o '\$LM\$\w{16}($|\s)' >> ${DIR}lm.txt
-echo ${IN} | egrep -o '^\w{16}:\w*($|\s)' >> ${DIR}oracle_salt.txt
-echo ${IN} | egrep -o '^O\$\w*\#\w{16}($|\s)' >> ${DIR}oracle_salt2.txt
-echo ${IN} | egrep -o '^\w+:O\$\w*\#\w{16}($|\s)' >> ${DIR}oracle_user.txt
-echo ${IN} | egrep -o '\$2a\$\w*\$\S{53}($|\s)' >> ${DIR}bcrypt.txt
-echo ${IN} | egrep -o '\$md5\$rounds=\w*\$\S{39}($|\s)' >> ${DIR}sunmd5.txt
-echo ${IN} | egrep -o 'u4-netntlm::\w*:\S{114}($|\s)' >> ${DIR}netntlm.txt
-echo ${IN} | egrep -o '\w*::\w*:\S{156}($|\s)' >> ${DIR}netntlmv2.txt
-echo ${IN} | egrep -o '\{smd5\}\S{31}($|\s)' >> ${DIR}aix-smd5.txt
-echo ${IN} | egrep -o '\{ssha256\}\S{63}($|\s)' >> ${DIR}aix-ssha256.txt
-echo ${IN} | egrep -o '\{ssha512\}\S{106}($|\s)' >> ${DIR}aix-sha512.txt
-echo ${IN} | egrep -o '\{ssha1\}\S{47}($|\s)' >> ${DIR}aix-ssha1.txt
-echo ${IN} | egrep -o '^\w{47}($|\s)' >> ${DIR}forigate.txt
-echo ${IN} | egrep -o '\$\w*\$\w*\$\w{128}($|\s)' >> ${DIR}pbkdf2-hmac-sha512.txt
-echo ${IN} | egrep -o 'grub.pbkdf2.sha512.\w*.\S{257}($|\s)' >> ${DIR}pbkdf2-hmac-sha512.txt
-echo ${IN} | egrep -o '^\w{130}($|\s)' >> ${DIR}lotus85.txt
-echo ${IN} | egrep -o '\$5\Srounds=\w*\$\S{60}($|\s)' >> ${DIR}sha256crypt.txt
-echo ${IN} | egrep -o '^\w*\$\w{16}($|\s)' >> ${DIR}sapb.txt
-echo ${IN} | egrep -o '^\w*\$\w{40}($|\s)' >> ${DIR}sapg.txt
-echo ${IN} | egrep -o '\$S\$\S{52}($|\s)' >> ${DIR}drupal7.txt
-echo ${IN} | egrep -o '^\w{86}($|\s)' >> ${DIR}sybasease.txt
-echo ${IN} | egrep -o '^\w{49}($|\s)' >> ${DIR}citrix_ns10.txt
-echo ${IN} | egrep -o '\$racf\$\*\w*\*\w{16}($|\s)' >> ${DIR}racf.txt
-echo ${IN} | egrep -o '\$8\$\S{58}($|\s)' >> ${DIR}pbkdf2-hmac-sha256.txt
-echo ${IN} | egrep -o '\$office\$\*20(07|10|13)\*\w*\*\w*\*\w*\*(\S{106}|\S{130})($|\s)' >> ${DIR}office.txt
-echo ${IN} | egrep -o '\$oldoffice\$\w*\*(\S{98}|\S{106})($|\s)' >> ${DIR}oldoffice.txt
-echo ${IN} | egrep -o '^\w{96}($|\s)' >> ${DIR}raw-sha384.txt
+def look_for_other(line, output):
+    save_result('ssn',
+        re.finditer('\b[0-9]{3}[ -]{1}[0-9]{2}[ -]{1}[0-9]{4}\b', line),
+        output)
+    save_result('email',
+        re.finditer('\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b', line),
+        output)
 
-for f in ${DIR}*; do
-    cat $f | sort | uniq > ${DIR}tmp
-    mv ${DIR}tmp $f
-done
+def save_result(hash_type, re_object, output):
+    found = []
+    for result in re_object:
+        found.append(result.group())
+    if len(found) > 0:
+        f = open(os.path.join(output, hash_type), 'a+')
+        for result in found:
+            f.write('%s\n' % result)
+        f.close()
+
+if __name__ == "__main__":
+    if not sys.stdin.isatty():
+        f = sys.stdin
+        output = "/tmp/"
+        if '--output' in sys.argv:
+            output = sys.argv[sys.argv.index("--output") +1]
+    else:
+        parser = argparser.ArgumentParser()
+        parser.add_argument('path', help="path to input")
+        parser.add_argument('output', help="output dir path")
+        args = parser.parser_args()
+        f = open(args.path, 'r')
+        output = args.output
+    run(f, output)
