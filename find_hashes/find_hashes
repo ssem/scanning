@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR="/tmp/tmp/"
+DIR="/mnt/movies/other/pastebin/"
 IN=`cat $@`
 
 # credit cards
