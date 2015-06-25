@@ -1,0 +1,14 @@
+#!/bin/bash
+
+home=`pwd`
+
+### libpcap ###
+sudo apt-get install libpcap0.8-dev
+
+### masscan ###
+unzip masscan-master.zip
+cd masscan-master
+make
+sudo make install
+cd $home
+rm -r masscan-master

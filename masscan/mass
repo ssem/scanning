@@ -1,8 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env python
+import os
+import argparse
+import subprocess
 
-if [ $# -eq 0 ]
-then
-	echo -e "\n\tUsage: <port> <rate> <range_file> <output>\n"
-else
-	sudo masscan -p $1 --banners --rate $2 -iL $3 --exclude "255.255.255.255" --http-user-agent "Mozilla/5.0 (Windows NT 6.3; WOW64)" -oL $4 --connection-timeout 100 --capture html
-fi
+def run(pfile, rate, rfile, output):
+    for line in open(pfile, 'r'):
+        if line.startswith('#'):
+            continue
+        port = line.split(' ')[0]
+        if len(port) > 0:
+            masscan(port, rate, rfile, os.path.join(output, port))
+
+def masscan(port, rate, rfile, output):
+    p = subprocess.Popen(
+        ['masscan', '-p', port, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'])
+    p.wait()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("pfile", help="port file")
+    parser.add_argument("rate", help="packets per sec")
+    parser.add_argument("rfile", help="range file")
+    parser.add_argument("output", help="output dir")
+    args = parser.parse_args()
+    run(args.pfile, args.rate, args.rfile, args.output)
+

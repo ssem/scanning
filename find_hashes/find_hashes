@@ -6,7 +6,6 @@ import argparse
 
 def run(stream, output):
     for line in stream:
-        print '#', line
         look_for_hashes(line, output)
         look_for_credit_cards(line, output)
         look_for_other(line, output)
@@ -14,7 +13,7 @@ def run(stream, output):
 def look_for_hashes(line, output):
     save_result('rawmd5-rawmd4-nt-lotus5', re.finditer('^\w{32}($|\s)', line), output)
     save_result('rawsha1-ripemd160-mysqlsha1', re.finditer('^\w{40}($|\s)', line), output)
-    save_result('mysql-pixmd5-lm', re.finditer('^\w{16}($|\s)', line), output)
+    save_result('mysqluser-pixmd5user', re.finditer('^\w*:\w{16}($|\s)', line), output)
     save_result('mysqlsha1', re.finditer('\w*:\*\w{40}($|\s)', line), output)
     save_result('phpass', re.finditer('\$[P|H]\$\S{31}($|\s)', line), output)
     save_result('freebsdmd5', re.finditer('\$1\$\w{8}\$\S{22}($|\s)', line), output)
@@ -22,16 +21,14 @@ def look_for_hashes(line, output):
     save_result('mscashsalt2', re.finditer('M\$\S*\#\w{32}:\S*($|\s)', line), output)
     save_result('mscash', re.finditer('M\$\S*\#\w{32}($|\s)', line), output)
     save_result('rawsha256ghost', re.finditer('^\w{64}($|\s)', line), output)
-    save_result('descrypt', re.finditer('^\S{13}($|\s)', line), output)
     save_result('descryptuser', re.finditer('^\w*:\S{13}($|\s)', line), output)
     save_result('md5crypt', re.finditer('\$apr1\$\w{8}\$\S{22}($|\s)', line), output)
     save_result('whirlpool', re.finditer('^\w{128}($|\s)', line), output)
     save_result('sha512crypt', re.finditer('\$6\$\w*\$\S{86}($|\s)', line), output)
     save_result('mscash2', re.finditer('\$DCC2\$10240\#\w*\#\w{32}($|\s)', line), output)
     save_result('lm', re.finditer('\$LM\$\w{16}($|\s)', line), output)
-    save_result('oraclesalt', re.finditer('^\w{16}:\w*($|\s)', line), output)
-    save_result('oraclesalt2', re.finditer('^O\$\w*\#\w{16}($|\s)', line), output)
-    save_result('oracleuser', re.finditer('^\w+:O\$\w*\#\w{16}($|\s)', line), output)
+    save_result('oracle11', re.finditer('\w*:\w{60}($|\s)', line), output)
+    save_result('oracle', re.finditer('^O\$\w*\#\w{16}($|\s)', line), output)
     save_result('bcrypt', re.finditer('\$2a\$\w*\$\S{53}($|\s)', line), output)
     save_result('sunmd5', re.finditer('\$md5\$rounds=\w*\$\S{39}($|\s)', line), output)
     save_result('netntlm', re.finditer('u4-netntlm::\w*:\S{114}($|\s)', line), output)
@@ -105,10 +102,10 @@ if __name__ == "__main__":
         if '--output' in sys.argv:
             output = sys.argv[sys.argv.index("--output") +1]
     else:
-        parser = argparser.ArgumentParser()
+        parser = argparse.ArgumentParser()
         parser.add_argument('path', help="path to input")
         parser.add_argument('output', help="output dir path")
-        args = parser.parser_args()
+        args = parser.parse_args()
         f = open(args.path, 'r')
         output = args.output
     run(f, output)

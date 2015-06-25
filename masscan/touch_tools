@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+import time
+import socket
+import argparse
+
+class Parent():
+    def get_banner_masscan(self, massFile, timeout=10):
+        for line in open(massFile, 'r'):
+            if not line.startswith('#'):
+                try:
+                    result = line.rstrip('\r\n').split(' ')
+                    yield {'status': result[0],
+                           'protocol': result[1],
+                           'port': result[2],
+                           'ip': result[3],
+                           'time': time.strftime('%d %b %y %H:%M:%S', time.localtime(float(result[4]))),
+                           'banner': self.get_banner(result[3], result[2], timeout)}
+                except KeyboardInterrupt:exit('bye')
+                except Exception:pass
+
+    def get_banner(self, ip, port, timeout=10):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(int(timeout))
+        s.connect((ip, int(port)))
+        banner = s.recv(4096)
+        s.close()
+        return banner
+
+class Chargen(Parent):
+    def get_banner(self, ip, port, timeout=10):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(int(timeout))
+        s.connect((ip, int(port)))
+        banner = s.recv(10)
+        s.close()
+        return banner
+
+
+class Ftp(Parent):
+    pass
+
+class Telnet(Parent):
+    pass
+    '''
+    def get_banner(self, ip, port, timeout=10):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(int(timeout))
+        s.connect((ip, int(port)))
+        banner = s.recv(4096)
+        s.send(chr(255) + chr(252) + chr(24))
+        s.send(chr(255) + chr(252) + chr(32))
+        s.send(chr(255) + chr(252) + chr(35))
+        s.send(chr(255) + chr(252) + chr(39))
+        banner += s.recv(4096)
+        s.send(chr(255) + chr(254) + chr(3))
+        banner += s.recv(4096)
+        s.send(chr(255) + chr(252) + chr(1))
+        s.send(chr(255) + chr(252) + chr(31))
+        s.recv(4096)
+        s.send(chr(255) + chr(254) + chr(1))
+        banner += s.recv(4096)
+        s.close()
+        return banner
+    '''
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('type', help="chargen, ftp, telnet")
+    parser.add_argument('mass', help="masscan file")
+    parser.add_argument('--timeout', default=10, help="connection timeout (DEFAULT:10)")
+    args = parser.parse_args()
+    if args.type == "chargen":
+        protocal = Chargen()
+    elif args.type == "ftp":
+        protocal = Ftp()
+    elif args.type == "telnet":
+        protocal = Telnet()
+    for result in protocal.get_banner_masscan(args.mass, args.timeout):
+        print '{:<20} {:<20} {:<20}'.format('%s:%s' % (result['ip'], result['port']),
+                                            result['time'],
+                                            result['banner'])
