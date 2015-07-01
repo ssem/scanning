@@ -17,7 +17,7 @@ class Parent():
 
     def _worker(self, scan, timeout):
         try:
-            banner = self.get_banner(scan[3], scan[2], timeout)
+            banner, exploit = self.get_banner(scan[3], scan[2], timeout)
             if banner is not None:
                 r = {'status': scan[0],
                      'protocol': scan[1],
@@ -25,7 +25,8 @@ class Parent():
                      'ip': scan[3],
                      'time': time.strftime(
                         '%d %b %y %H:%M:%S', time.localtime(float(scan[4]))),
-                     'banner': banner.rstrip('\r\n')}
+                     'banner': banner.rstrip('\r\n'),
+                     'exploit': exploit}
                 self.results.append(r)
         except:pass
 
@@ -67,12 +68,11 @@ class Parent():
 
     def get_banner(self, ip, port, timeout=10):
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(int(timeout))
-            s.connect((ip, int(port)))
-            banner = s.recv(4096)
-            s.close()
-            return banner
+            banner = ''
+            r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
+            for field in r.headers:
+                banner += '%s:%s' % (field, r.headers[field])
+            return banner, ''
         except socket.error as e:pass
 
 class HoneyPot(Parent): # works
@@ -84,9 +84,9 @@ class HoneyPot(Parent): # works
             s.settimeout(int(timeout))
             s.connect((ip, int(port)))
             s.send('/')
-            banner = s.recv(10)
+            banner = s.recv(100)
             s.close()
-            return banner
+            return banner, ''
         except socket.error as e:pass
 
 class Chargen(Parent): # works
@@ -99,17 +99,62 @@ class Chargen(Parent): # works
             s.connect((ip, int(port)))
             banner = s.recv(10)
             s.close()
-            return banner
+            return banner, ''
         except socket.error as e:pass
 
 class Ftp(Parent): # works
     default_port = 21
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner, ''
+        except socket.error as e:pass
+
+
 class Ssh(Parent): # works
     default_port = 22
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            if 'Tectia Server' in banner:
+                exploit = 'OSVDB 88103'
+            elif 'ArrayOS' in banner:
+                exploit = 'OSVDB 104654'
+            elif 'SysaxSSH' in banner:
+                exploit = 'OSVBD 79689'
+            elif 'WeOnlyDo-wodFTPD 2.1.8.98' in banner:
+                exploit = 'OSVBD 25569'
+            elif 'WeOnlyDo' in banner:
+                exploit = 'OSVDB 88006'
+            else:
+                exploit = ''
+            return banner, exploit
+        except socket.error as e:pass
+
+
 class Telnet(Parent): # works
     default_port = 23
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner, ''
+        except socket.error as e:pass
+
 
 class Private_Mail(Parent):
     default_port = 24
@@ -125,11 +170,15 @@ class Http(Parent): # works
 
     def get_banner(self, ip, port, timeout=10):
         try:
-            response = ''
+            banner = ''
             r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
             for field in r.headers:
-                response += '%s:%s' % (field, r.headers[field])
-            return response
+                banner += '%s:%s' % (field, r.headers[field])
+                if 'Symantec Messaging Gateway' in banner:
+                    exploit = 'OSVDB 85028'
+                else:
+                    exploit = ''
+            return banner, exploit
         except socket.error as e:pass
 
 class Wangkongbao(Parent): # works
@@ -137,19 +186,41 @@ class Wangkongbao(Parent): # works
 
     def get_banner(self, ip, port, timeout=10):
         try:
-            response = ''
+            banner = ''
             r = requests.get('http://%s:%s/src/acloglogin.php' % (ip, port),
                 timeout=float(timeout))
             for field in r.headers:
-                response += '%s:%s' % (field, r.headers[field])
-            return response
+                banner += '%s:%s' % (field, r.headers[field])
+            return banner, ''
         except socket.error as e:pass
 
 class Remote_Telnet(Parent): # works
     default_port = 107
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner, ''
+        except socket.error as e:pass
+
+
 class Pop3(Parent): # works
     default_port = 110
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner, ''
+        except socket.error as e:pass
+
 
 class Sftp(Parent):
     default_port = 115
@@ -172,11 +243,21 @@ class End_Point(Parent):
             s.send(request)
             banner = s.recv(4096)
             s.close()
-            return banner
+            return banner, ''
         except socket.error as e:pass
 
 class Imap(Parent): # works
     default_port = 143
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner, ''
+        except socket.error as e:pass
 
 class Timbuktu(Parent):
     default_port = 407
@@ -186,11 +267,11 @@ class Https(Parent): # works
 
     def get_banner(self, ip, port, timeout=10):
         try:
-            response = ''
+            banner = ''
             r = requests.get('https://%s:%s' % (ip, port), timeout=float(timeout))
             for field in r.headers:
-                response += '%s:%s' % (field, r.headers[field])
-            return response
+                banner += '%s:%s' % (field, r.headers[field])
+            return banner, ''
         except socket.error as e:pass
 
 class Smb2(Parent):
@@ -225,11 +306,22 @@ class Rsync(Parent): # works
             s.send('/')
             banner = s.recv(4096)
             s.close()
-            return banner
+            return banner, ''
         except socket.error as e:pass
 
 class Vmauthd(Parent): # works
     default_port = 902
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner, ''
+        except socket.error as e:pass
+
 
 class Zenworks(Parent):
     default_port = 998
@@ -327,6 +419,17 @@ class Pcanywhere(Parent):
 class Vnc(Parent): # works
     default_port = 5900
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner, ''
+        except socket.error as e:pass
+
+
 class Cctv(Parent):
     default_port = 5920
 
@@ -365,11 +468,11 @@ class Http_Alternative(Parent): # works
 
     def get_banner(self, ip, port, timeout=10):
         try:
-            response = ''
+            banner = ''
             r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
             for field in r.headers:
-                response += '%s:%s' % (field, r.headers[field])
-            return response
+                banner += '%s:%s' % (field, r.headers[field])
+            return banner, ''
         except socket.error as e:pass
 
 class Influxdb(Parent):
@@ -395,11 +498,11 @@ class Nessus(Parent):
 
     def get_banner(self, ip, port, timeout=10):
         try:
-            response = ''
+            banner = ''
             r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
             for field in r.headers:
-                response += '%s:%s' % (field, r.headers[field])
-            return response
+                banner += '%s:%s' % (field, r.headers[field])
+            return banner, ''
         except socket.error as e:pass
 
 class Http_Alternative2(Parent): # works
@@ -407,11 +510,11 @@ class Http_Alternative2(Parent): # works
 
     def get_banner(self, ip, port, timeout=10):
         try:
-            response = ''
+            banner = ''
             r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
             for field in r.headers:
-                response += '%s:%s' % (field, r.headers[field])
-            return response
+                banner += '%s:%s' % (field, r.headers[field])
+            return banner, ''
         except socket.error as e:pass
 
 class Raysharp(Parent):
@@ -500,21 +603,27 @@ if __name__ == "__main__":
     args = parser.parse_args()
     lookup_table = {}
     classmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-    for classmember in classmembers:
+    for classmember in classmembers:# load all classes
         if classmember[0] != "Parent":
             cm = classmember[1]()
             lookup_table[cm.default_port] = cm
+    try:run_module(os.path.join(args.input_dir + '0'))
+    except:pass # try and run 0 first to catch honeypots
     for root, d, f in os.walk(args.input_dir):
         for filename in f:
-            path = os.path.join(root, filename)
-            try:
-                module = lookup_table[int(filename)]
-                module.que_masscan_file(path, args.rate, args.timeout)
-                module.wait()
-                f = open(os.path.join(args.output_dir, filename), 'w+')
-                for result in module.results:
-                    try:f.write('%s\n' % json.dumps(result))
-                    except:pass
-                f.close()
-            except KeyError:
-                sys.stderr.write('[Error] no module for: %s\n' % filename)
+            if filename != 0: # skip 0 because we already ran it
+                path = os.path.join(root, filename)
+                run_module(path)
+
+def run_module(path):
+    try:
+        module = lookup_table[int(filename)]
+        module.que_masscan_file(path, args.rate, args.timeout)
+        module.wait()
+        f = open(os.path.join(args.output_dir, filename), 'w+')
+        for result in module.results:
+            try:f.write('%s\n' % json.dumps(result))
+            except:pass
+        f.close()
+    except KeyError:
+        sys.stderr.write('[Error] no module for: %s\n' % filename)
