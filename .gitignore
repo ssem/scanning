@@ -1,3 +1,4 @@
 masscan/ranges/*
+malware/malshare/md5s
 *.pyc
 *.swp
