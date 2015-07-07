@@ -1,6 +1,10 @@
 #!/usr/bin/env python
+import os
+import sys
+import json
 import time
 import socket
+import inspect
 import argparse
 
 class Parent():
@@ -8,15 +12,20 @@ class Parent():
         for line in open(massFile, 'r'):
             if not line.startswith('#'):
                 try:
+                    print line.rstrip('\r\n')
                     result = line.rstrip('\r\n').split(' ')
                     yield {'status': result[0],
                            'protocol': result[1],
                            'port': result[2],
                            'ip': result[3],
-                           'time': time.strftime('%d %b %y %H:%M:%S', time.localtime(float(result[4]))),
-                           'banner': self.get_banner(result[3], result[2], timeout)}
+                           'time': time.strftime(
+                                '%d %b %y %H:%M:%S', time.localtime(float(result[4]))),
+                           'banner': self.get_banner(
+                                result[3], result[2], timeout).rstrip('\r\n')}
+                except socket.error as e:
+                    sys.stderr.write('%s\n' % e)
+                except socket.timeout:pass
                 except KeyboardInterrupt:exit('bye')
-                except Exception:pass
 
     def get_banner(self, ip, port, timeout=10):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -27,6 +36,8 @@ class Parent():
         return banner
 
 class Chargen(Parent):
+    default_port = 19
+
     def get_banner(self, ip, port, timeout=10):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(int(timeout))
@@ -35,47 +46,382 @@ class Chargen(Parent):
         s.close()
         return banner
 
-
 class Ftp(Parent):
-    pass
+    default_port = 21
+
+class Ssh(Parent):
+    default_port = 22
 
 class Telnet(Parent):
-    pass
-    '''
-    def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.send(chr(255) + chr(252) + chr(24))
-        s.send(chr(255) + chr(252) + chr(32))
-        s.send(chr(255) + chr(252) + chr(35))
-        s.send(chr(255) + chr(252) + chr(39))
-        banner += s.recv(4096)
-        s.send(chr(255) + chr(254) + chr(3))
-        banner += s.recv(4096)
-        s.send(chr(255) + chr(252) + chr(1))
-        s.send(chr(255) + chr(252) + chr(31))
-        s.recv(4096)
-        s.send(chr(255) + chr(254) + chr(1))
-        banner += s.recv(4096)
-        s.close()
-        return banner
-    '''
+    default_port = 23
+
+    #def get_banner(self, ip, port, timeout=10):
+    #    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #    s.settimeout(int(timeout))
+    #    s.connect((ip, int(port)))
+    #    banner = s.recv(4096)
+    #    s.send(chr(255) + chr(252) + chr(24))
+    #    s.send(chr(255) + chr(252) + chr(32))
+    #    s.send(chr(255) + chr(252) + chr(35))
+    #    s.send(chr(255) + chr(252) + chr(39))
+    #    banner += s.recv(4096)
+    #    s.send(chr(255) + chr(254) + chr(3))
+    #    banner += s.recv(4096)
+    #    s.send(chr(255) + chr(252) + chr(1))
+    #    s.send(chr(255) + chr(252) + chr(31))
+    #    s.recv(4096)
+    #    s.send(chr(255) + chr(254) + chr(1))
+    #    banner += s.recv(4096)
+    #    s.close()
+    #    return banner
+
+class Private_Mail(Parent):
+    default_port = 24
+
+class Smtp(Parent):
+    default_port = 25
+
+class Dns(Parent):
+    default_port = 53
+
+class Finger(Parent):
+    default_port = 79
+
+class Http(Parent):
+    default_port = 80
+
+class Wangkongbao(Parent):
+    default_port = 85
+
+class Remote_Telnet(Parent):
+    default_port = 107
+
+class Pop3(Parent):
+    default_port = 110
+
+class Sftp(Parent):
+    default_port = 115
+
+class End_Point(Parent):
+    default_port = 135
+
+class Nbname(Parent):
+    default_port = 137
+
+class Imap(Parent):
+    default_port = 143
+
+class Timbuktu(Parent):
+    default_port = 407
+
+class Https(Parent):
+    default_port = 443
+
+class Smb2(Parent):
+    default_port = 445
+
+class Modbus(Parent):
+    default_port = 502
+
+class Rexec(Parent):
+    default_port = 512
+
+class Rlogin(Parent):
+    default_port = 513
+
+class Rsh(Parent):
+    default_port = 514
+
+class Db2(Parent):
+    default_port = 523
+
+class Apple_File_Protocol(Parent):
+    default_port = 548
+
+class Rsync(Parent):
+    default_port = 873
+
+class Vmauthd(Parent):
+    default_port = 902
+
+class Zenworks(Parent):
+    default_port = 998
+
+class Nfs(Parent):
+    default_port = 1025
+
+class Java_Rmi(Parent):
+    default_port = 1099
+
+class Sap_Host(Parent):
+    default_port = 1128
+
+class Sid(Parent):
+    default_port = 1158
+
+class Nj_Rat(Parent):
+    default_port = 1170
+
+class Nessus(Parent):
+    default_port = 1241
+
+class Jrat(Parent):
+    default_port = 1336
+
+class Tns(Parent):
+    default_port = 1521
+
+class Dark_Comet(Parent):
+    default_port = 1604
+
+class H323(Parent):
+    default_port = 1720
+
+class Nfs(Parent):
+    default_port = 2049
+
+class Dlsw(Parent):
+    default_port = 2067
+
+class Digi(Parent):
+    default_port = 2362
+
+class Alphastor(Parent):
+    default_port = 3000
+
+class Novell(Parent):
+    default_port = 3037
+
+class Ib(Parent):
+    default_port = 3050
+
+class Apple_Remote_Desktop(Parent):
+    default_port = 3283
+
+class Sap_Router(Parent):
+    default_port = 3299
+
+class Mysql(Parent):
+    default_port = 3306
+
+class Posion_Ivy(Parent):
+    default_port = 3460
+
+class RTMP(Parent):
+    default_port = 3500
+
+class Nexpose(Parent):
+    default_port = 3780
+
+class Msf(Parent):
+    default_port = 3790
+
+class Sockso(Parent):
+    default_port = 4444
+
+class Kademlia(Parent):
+    default_port = 4672
+
+class Glass_Fish(Parent):
+    default_port = 4848
+
+class Windows_Deployment(Parent):
+    default_port = 5040
+
+class Sip(Parent):
+    default_port = 5060
+
+class Postgres(Parent):
+    default_port = 5432
+
+class IsqlPlus(Parent):
+    default_port = 5560
+
+class Pcanywhere(Parent):
+    default_port = 5631
+
+class Vnc(Parent):
+    default_port = 5900
+
+class Cctv(Parent):
+    default_port = 5920
+
+class CouchDb(Parent):
+    default_port = 5984
+
+class X11(Parent):
+    default_port = 6000
+
+class Manage_Engine(Parent):
+    default_port = 6060
+
+class Dameware(Parent):
+    default_port = 6129
+
+class Redis(Parent):
+    default_port = 6379
+
+class InfoPage_Svr(Parent):
+    default_port = 6405
+
+class Groupwise(Parent):
+    default_port = 7181
+
+class Energizer(Parent):
+    default_port = 7777
+
+class Soap(Parent):
+    default_port = 8000
+
+class ChromeCast(Parent):
+    default_port = 8008
+
+class Https(Parent):
+    default_port = 8080
+
+class Influxdb(Parent):
+    default_port = 8086
+
+class Net_Decision(Parent):
+    default_port = 8087
+
+class Atlassian(Parent):
+    default_port = 8095
+
+class Apache(Parent):
+    default_port = 8161
+
+class Vmware_Server(Parent):
+    default_port = 8222
+
+class Adobe(Parent):
+    default_port = 8400
+
+class Nessus(Parent):
+    default_port = 8834
+
+class Openmind(Parent):
+    default_port = 8888
+
+class Raysharp(Parent):
+    default_port = 9000
+
+class Vmware_Vcenter(Parent):
+    default_port = 9084
+
+class Indices(Parent):
+    default_port = 9200
+
+class Openvas(Parent):
+    default_port = 9390
+
+class QuickTime(Parent):
+    default_port = 9391
+
+class Lantronix(Parent):
+    default_port = 9999
+
+class Jspy(Parent):
+    default_port = 10001
+
+class Netbus(Parent):
+    default_port = 12345
+
+class Rosewill(Parent):
+    default_port = 13364
+
+class Wdbrpc(Parent):
+    default_port = 17185
+
+class Steam(Parent):
+    default_port = 27015
+
+class MongoDb(Parent):
+    default_port = 27017
+
+class Sub7(Parent):
+    default_port = 27374
+
+class Quake(Parent):
+    default_port = 27960
+
+class Koyo(Parent):
+    default_port = 28784
+
+class Lantronix_Discovery(Parent):
+    default_port = 30718
+
+class Titen_Fto(Parent):
+    default_port = 31001
+
+class Back_Orfice(Parent):
+    default_port = 31337
+
+class Sercomm(Parent):
+    default_port = 32764
+
+class Symantic(Parent):
+    default_port = 41080
+
+class Sielco(Parent):
+    default_port = 46824
+
+class Smt(Parent):
+    default_port = 49152
+
+class SubSari(Parent):
+    default_port = 50000
+
+class Sap_Management(Parent):
+    default_port = 50013
+
+class Msf_Rpc(Parent):
+    default_port = 55553
+
+def call_and_report(lookup_table, port, path, timeout, output, output_dir):
+    try:
+        module = lookup_table[int(port)]
+        f = open(os.path.join(output_dir, port), 'a+')
+        for result in module.get_banner_masscan(path, int(args.timeout)):
+            print result['banner']
+            if output == "tab":
+                f.write('{}\t{}\t{}\n'.format('%s:%s' % (
+                    result['ip'], result['port']), result['time'], result['banner']))
+            elif output == "csv":
+                f.write('{},{},{},{}\n'.format(
+                    result['ip'], result['port'], result['time'], result['banner']))
+            elif output == "json":
+                f.write("%s\n" % json.dumps(result))
+        f.close()
+    except KeyError:
+        sys.stderr.write('no module for port: %s\n' % port)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('type', help="chargen, ftp, telnet")
-    parser.add_argument('mass', help="masscan file")
-    parser.add_argument('--timeout', default=10, help="connection timeout (DEFAULT:10)")
+    parser.add_argument('input_dir',
+        help="masscan found directory")
+    parser.add_argument('output_dir',
+        help="results output dir")
+    parser.add_argument('--output', default="json",
+        help="json, csv, tab (DEFAULT: json)")
+    parser.add_argument('--timeout', default="10",
+        help="connection timeout (DEFAULT:10)")
+    parser.add_argument('--all', action='store_true',
+        help="ignore port number and try all types")
     args = parser.parse_args()
-    if args.type == "chargen":
-        protocal = Chargen()
-    elif args.type == "ftp":
-        protocal = Ftp()
-    elif args.type == "telnet":
-        protocal = Telnet()
-    for result in protocal.get_banner_masscan(args.mass, args.timeout):
-        print '{:<20} {:<20} {:<20}'.format('%s:%s' % (result['ip'], result['port']),
-                                            result['time'],
-                                            result['banner'])
+    lookup_table = {}
+    classmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    for classmember in classmembers:
+        if classmember[0] != "Parent":
+            cm = classmember[1]()
+            lookup_table[cm.default_port] = cm
+    for root, d, f in os.walk(args.input_dir):
+        for filename in f:
+            path = os.path.join(root, filename)
+            if args.all:
+                for port in lookup_table:
+                    call_and_report(lookup_table, port, path, args.timeout,
+                                    args.output, args.output_dir)
+            else:
+                call_and_report(lookup_table, filename, path, args.timeout,
+                                args.output, args.output_dir)
