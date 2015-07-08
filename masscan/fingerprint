@@ -391,7 +391,8 @@ def call_and_report(lookup_table, port, path, timeout, output, output_dir):
                 f.write('{},{},{},{}\n'.format(
                     result['ip'], result['port'], result['time'], result['banner']))
             elif output == "json":
-                f.write("%s\n" % json.dumps(result))
+                try:f.write("%s\n" % json.dumps(result))
+                except:pass
         f.close()
     except KeyError:
         sys.stderr.write('no module for port: %s\n' % port)
