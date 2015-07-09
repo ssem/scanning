@@ -6,34 +6,59 @@ import time
 import socket
 import inspect
 import argparse
+import threading
 
 class Parent():
-    def get_banner_masscan(self, massFile, timeout=10):
+    def __init__(self):
+        self.results = []
+        self.threads = []
+
+    def _worker(self, scan, timeout):
+        try:
+            banner = self.get_banner(scan[3], scan[2], timeout)
+            r = {'status': scan[0],
+                 'protocol': scan[1],
+                 'port': scan[2],
+                 'ip': scan[3],
+                 'time': time.strftime(
+                    '%d %b %y %H:%M:%S', time.localtime(float(scan[4]))),
+                 'banner': banner.rstrip('\r\n')}
+            self.results.append(r)
+        except:pass
+
+    def que_masscan_file(self, massFile, rate=100, timeout=10):
         for line in open(massFile, 'r'):
             if not line.startswith('#'):
-                try:
-                    print line.rstrip('\r\n')
-                    result = line.rstrip('\r\n').split(' ')
-                    yield {'status': result[0],
-                           'protocol': result[1],
-                           'port': result[2],
-                           'ip': result[3],
-                           'time': time.strftime(
-                                '%d %b %y %H:%M:%S', time.localtime(float(result[4]))),
-                           'banner': self.get_banner(
-                                result[3], result[2], timeout).rstrip('\r\n')}
-                except socket.error as e:
-                    sys.stderr.write('%s\n' % e)
-                except socket.timeout:pass
-                except KeyboardInterrupt:exit('bye')
+                scan = line.rstrip('\r\n').split(' ')
+                t = threading.Thread(target=self._worker, args=(scan, timeout))
+                t.start()
+                self.threads.append(t)
+                time.sleep(1/float(rate))
+
+    def wait(self):
+        try:
+            while len(self.threads) > 0:
+                new_list = []
+                for thread in self.threads:
+                    if thread.is_alive():
+                        new_list.append(thread)
+                self.threads = new_list
+        except KeyboardInterrupt:
+            exit('Bye')
 
     def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
+
+class HoneyPot(Parent):
+    default_port = 0
 
 class Chargen(Parent):
     default_port = 19
@@ -177,7 +202,7 @@ class Dark_Comet(Parent):
 class H323(Parent):
     default_port = 1720
 
-class Nfs(Parent):
+class Network_file_system(Parent):
     default_port = 2049
 
 class Dlsw(Parent):
@@ -378,37 +403,14 @@ class Sap_Management(Parent):
 class Msf_Rpc(Parent):
     default_port = 55553
 
-def call_and_report(lookup_table, port, path, timeout, output, output_dir):
-    try:
-        module = lookup_table[int(port)]
-        f = open(os.path.join(output_dir, port), 'a+')
-        for result in module.get_banner_masscan(path, int(args.timeout)):
-            print result['banner']
-            if output == "tab":
-                f.write('{}\t{}\t{}\n'.format('%s:%s' % (
-                    result['ip'], result['port']), result['time'], result['banner']))
-            elif output == "csv":
-                f.write('{},{},{},{}\n'.format(
-                    result['ip'], result['port'], result['time'], result['banner']))
-            elif output == "json":
-                try:f.write("%s\n" % json.dumps(result))
-                except:pass
-        f.close()
-    except KeyError:
-        sys.stderr.write('no module for port: %s\n' % port)
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_dir',
-        help="masscan found directory")
-    parser.add_argument('output_dir',
-        help="results output dir")
-    parser.add_argument('--output', default="json",
-        help="json, csv, tab (DEFAULT: json)")
+    parser.add_argument('input_dir', help="masscan found directory")
+    parser.add_argument('output_dir', help="results output dir")
+    parser.add_argument('--rate', default="100",
+        help="scan interval per sec (DEFAULT:100)")
     parser.add_argument('--timeout', default="10",
         help="connection timeout (DEFAULT:10)")
-    parser.add_argument('--all', action='store_true',
-        help="ignore port number and try all types")
     args = parser.parse_args()
     lookup_table = {}
     classmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
@@ -419,10 +421,14 @@ if __name__ == "__main__":
     for root, d, f in os.walk(args.input_dir):
         for filename in f:
             path = os.path.join(root, filename)
-            if args.all:
-                for port in lookup_table:
-                    call_and_report(lookup_table, port, path, args.timeout,
-                                    args.output, args.output_dir)
-            else:
-                call_and_report(lookup_table, filename, path, args.timeout,
-                                args.output, args.output_dir)
+            try:
+                module = lookup_table[int(filename)]
+                module.que_masscan_file(path, args.rate, args.timeout)
+                module.wait()
+                f = open(os.path.join(args.output_dir, filename), 'w+')
+                for result in module.results:
+                    try:f.write(json.dumps(result))
+                    except:pass
+                f.close()
+            except KeyError:
+                sys.stderr.write('[Error] no module for: %s\n' % filename)

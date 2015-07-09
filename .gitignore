@@ -1,4 +1,8 @@
 masscan/ranges/*
+masscan/found
 malware/malshare/md5s
+malware/malshare/md5s.bk
+malware/malshare/found
+malware/malware/found
 *.pyc
 *.swp
