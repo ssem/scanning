@@ -51,6 +51,7 @@ class Parent():
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(int(timeout))
             s.connect((ip, int(port)))
+            s.send('/')
             banner = s.recv(4096)
             s.close()
             return banner
@@ -60,45 +61,73 @@ class Parent():
 class HoneyPot(Parent):
     default_port = 0
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            s.send('/')
+            banner = s.recv(10)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
+
 class Chargen(Parent):
     default_port = 19
 
     def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(10)
-        s.close()
-        return banner
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(10)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Ftp(Parent):
     default_port = 21
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
+
 class Ssh(Parent):
     default_port = 22
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Telnet(Parent):
     default_port = 23
 
-    #def get_banner(self, ip, port, timeout=10):
-    #    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #    s.settimeout(int(timeout))
-    #    s.connect((ip, int(port)))
-    #    banner = s.recv(4096)
-    #    s.send(chr(255) + chr(252) + chr(24))
-    #    s.send(chr(255) + chr(252) + chr(32))
-    #    s.send(chr(255) + chr(252) + chr(35))
-    #    s.send(chr(255) + chr(252) + chr(39))
-    #    banner += s.recv(4096)
-    #    s.send(chr(255) + chr(254) + chr(3))
-    #    banner += s.recv(4096)
-    #    s.send(chr(255) + chr(252) + chr(1))
-    #    s.send(chr(255) + chr(252) + chr(31))
-    #    s.recv(4096)
-    #    s.send(chr(255) + chr(254) + chr(1))
-    #    banner += s.recv(4096)
-    #    s.close()
-    #    return banner
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Private_Mail(Parent):
     default_port = 24
@@ -106,14 +135,23 @@ class Private_Mail(Parent):
 class Smtp(Parent):
     default_port = 25
 
-class Dns(Parent):
-    default_port = 53
-
 class Finger(Parent):
     default_port = 79
 
 class Http(Parent):
     default_port = 80
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            s.send("GET / HTTP/1.0")
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Wangkongbao(Parent):
     default_port = 85
@@ -123,6 +161,17 @@ class Remote_Telnet(Parent):
 
 class Pop3(Parent):
     default_port = 110
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Sftp(Parent):
     default_port = 115
@@ -135,6 +184,17 @@ class Nbname(Parent):
 
 class Imap(Parent):
     default_port = 143
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Timbuktu(Parent):
     default_port = 407
@@ -166,8 +226,31 @@ class Apple_File_Protocol(Parent):
 class Rsync(Parent):
     default_port = 873
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            s.send('/')
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
+
 class Vmauthd(Parent):
     default_port = 902
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Zenworks(Parent):
     default_port = 998
@@ -268,6 +351,18 @@ class Pcanywhere(Parent):
 class Vnc(Parent):
     default_port = 5900
 
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
+
+
 class Cctv(Parent):
     default_port = 5920
 
@@ -301,8 +396,20 @@ class Soap(Parent):
 class ChromeCast(Parent):
     default_port = 8008
 
-class Https(Parent):
+class Http_Alternative(Parent):
     default_port = 8080
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            s.send("GET / HTTP/1.0")
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Influxdb(Parent):
     default_port = 8086
@@ -325,8 +432,20 @@ class Adobe(Parent):
 class Nessus(Parent):
     default_port = 8834
 
-class Openmind(Parent):
+class Http_Alternative2(Parent):
     default_port = 8888
+
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            s.send("GET / HTTP/1.0")
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:
+            print e
 
 class Raysharp(Parent):
     default_port = 9000
@@ -427,7 +546,7 @@ if __name__ == "__main__":
                 module.wait()
                 f = open(os.path.join(args.output_dir, filename), 'w+')
                 for result in module.results:
-                    try:f.write(json.dumps(result))
+                    try:f.write('%s\n' % json.dumps(result))
                     except:pass
                 f.close()
             except KeyError:
