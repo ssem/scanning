@@ -427,7 +427,7 @@ if __name__ == "__main__":
                 module.wait()
                 f = open(os.path.join(args.output_dir, filename), 'w+')
                 for result in module.results:
-                    try:f.write(json.dumps(result))
+                    try:f.write('%s\n' % json.dumps(result))
                     except:pass
                 f.close()
             except KeyError:
