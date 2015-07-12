@@ -4,5 +4,6 @@ malware/malshare/md5s
 malware/malshare/md5s.bk
 malware/malshare/found
 malware/malware/found
+find_hashes/found
 *.pyc
 *.swp

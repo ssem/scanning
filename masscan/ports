@@ -5,10 +5,8 @@
 23      # telnet
 24      # private mail
 25      # smtp
-53      # dns
 79      # finger
 80      # http
-85      # wangkongbao
 107     # remote telnet
 110     # pop3
 115     # sftp
