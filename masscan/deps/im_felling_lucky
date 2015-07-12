@@ -2,6 +2,9 @@
 
 home=`pwd`
 
+### unzip ###
+sudo apt-get install unzip
+
 ### libpcap ###
 sudo apt-get install libpcap0.8-dev
 
