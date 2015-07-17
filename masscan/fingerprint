@@ -202,8 +202,8 @@ class Modbus(Parent):
 class Rexec(Parent):
     default_port = 512
 
-#class Rlogin(Parent):
-#    default_port = 513
+class Rlogin(Parent):
+    default_port = 513
 
 class Rsh(Parent):
     default_port = 514
@@ -279,8 +279,8 @@ class Novell(Parent):
 class Ib(Parent):
     default_port = 3050
 
-#class Apple_Remote_Desktop(Parent):
-#    default_port = 3283
+class Apple_Remote_Desktop(Parent):
+    default_port = 3283
 
 class Sap_Router(Parent):
     default_port = 3299
@@ -309,8 +309,8 @@ class Kademlia(Parent):
 class Glass_Fish(Parent):
     default_port = 4848
 
-#class Windows_Deployment(Parent):
-#    default_port = 5040
+class Windows_Deployment(Parent):
+    default_port = 5040
 
 class Sip(Parent):
     default_port = 5060
@@ -435,8 +435,8 @@ class Lantronix(Parent):
 class Jspy(Parent):
     default_port = 10001
 
-#class Netbus(Parent):
-#    default_port = 12345
+class Netbus(Parent):
+    default_port = 12345
 
 class Rosewill(Parent):
     default_port = 13364
