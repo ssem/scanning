@@ -18,7 +18,7 @@ class Parent():
     def _worker(self, scan, timeout):
         try:
             banner = self.get_banner(scan[3], scan[2], timeout)
-            if banner:
+            if banner is not None:
                 r = {'status': scan[0],
                      'protocol': scan[1],
                      'port': scan[2],
@@ -157,14 +157,29 @@ class Sftp(Parent):
 class End_Point(Parent):
     default_port = 135
 
-class Nbname(Parent):
-    default_port = 137
+    def get_banner(self, ip, port, timeout=10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(int(timeout))
+            s.connect((ip, int(port)))
+            request = '\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00'
+            request += '\x4b\x00\x00\x00\x4b\x00\x00\x00\x05\x00'
+            request += '\x13\x00\x0d\x78\x56\x34\x12\x34\x12\xcd'
+            request += '\xab\xef\x00\x01\x23\x45\x67\xcf\xfb\x01'
+            request += '\x00\x02\x00\x00\x00\x13\x00\x0d\x04\x5d'
+            request += '\x88\x8a\xeb\x1c\xc9\x11\x9f\xe8\x08\x00'
+            request += '\x2b\x10\x48\x60'
+            s.send(request)
+            banner = s.recv(4096)
+            s.close()
+            return banner
+        except socket.error as e:pass
 
 class Imap(Parent): # works
     default_port = 143
 
-#class Timbuktu(Parent):
-#    default_port = 407
+class Timbuktu(Parent):
+    default_port = 407
 
 class Https(Parent): # works
     default_port = 443
@@ -218,9 +233,6 @@ class Vmauthd(Parent): # works
 
 class Zenworks(Parent):
     default_port = 998
-
-class Nfs(Parent):
-    default_port = 1025
 
 class Java_Rmi(Parent):
     default_port = 1099

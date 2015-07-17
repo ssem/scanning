@@ -25,7 +25,6 @@
 873     # rsync
 902     # vmauthd
 998     # zenworks
-1025    # nfs
 1099    # java_rmi
 1128    # sap
 1158    # sid
