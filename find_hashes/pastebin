@@ -16,16 +16,21 @@ class Pastebin():
             self.scrape_page(page)
 
     def scrape_page(self, page):
-        http = requests.get(
-            url='http://pastebin.com/raw.php?i=%s' % page,
-            headers={'user-agent':self.quote})
-        if self.path:
-            path = '%s/%s' % (self.path, page)
-            p = open(path, 'w+')
-            p.write(http.content)
-            p.close()
-        else:
-            print http.content
+        try:
+            http = requests.get(
+                url='http://pastebin.com/raw.php?i=%s' % page,
+                headers={'user-agent':self.quote},
+                timeout=10)
+            if self.path:
+                path = '%s/%s' % (self.path, page)
+                p = open(path, 'w+')
+                p.write(http.content)
+                p.close()
+            else:
+                sys.stdout.write(http.content)
+        except Exception as e:
+            sys.stderr.write(str(e))
+
 
     def scrape_archive(self):
         http = requests.get(
