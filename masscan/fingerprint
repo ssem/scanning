@@ -112,7 +112,14 @@ class Ftp(Parent): # works
             s.connect((ip, int(port)))
             banner = s.recv(4096)
             s.close()
-            return banner, ''
+            if "ProFTPD" in banner:
+                exploit = "OSVDB 68985"
+            elif:
+                "Pure-FTPd" in banner:
+                exploit = "OSVDB 112004"
+            else:
+                exploit = ""
+            return banner, exploit
         except socket.error as e:pass
 
 
