@@ -5,10 +5,12 @@ import subprocess
 
 def run(pfile, rate, rfile, output):
     for line in open(pfile, 'r'):
-        if line.startswith('#'):
+        line = line.rstrip('\r\n')
+        if line.startswith('#') or len(line) < 1:
             continue
         port = line.split(' ')[0]
         if len(port) > 0:
+            print '\nPort:%s\tRate:%s\tRange:%s' % (port, rate, rfile)
             masscan(port, rate, rfile, os.path.join(output, port))
 
 def masscan(port, rate, rfile, output):

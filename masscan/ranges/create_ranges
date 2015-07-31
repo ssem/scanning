@@ -1,19 +1,44 @@
 #!/usr/bin/env python
-
+import sys
+import socket
 import requests
+import argparse
 
-http1 = requests.get('http://www.nirsoft.net/countryip/')
-for line in http1.content.split('\n'):
-    if '<td><a href="' in line:
-	url = 'http://www.nirsoft.net/countryip/'
-	url += line.split('href="')[1].split('">')[0]
-	country = line.split('.html">')[1].split('</a>')[0]
-	f = open(country.replace(' ', '_'), 'w+')
-	http2 = requests.get(url)
-	for line in http2.content.split('\n'):
-	    if '<tr> <td>' in line:
-		for row in line.split('<tr> <td>'): 
-		    if ' <td>' in row:
-		    	column = row.split(' <td>')
-			f.write('%s-%s\n' % (column[0], column[1]))
-	f.close()
+def get_country():
+    try:http = requests.get(url='http://www.nirsoft.net/countryip/', timeout=5)
+    except requests.exceptions.Timeout:
+        exit('\n\tBlocked from http://www.nirsoft.net/countryip/?\r\n')
+    for line in http.content.split('\n'):
+        if '<td><a href="' in line:
+            url = 'http://www.nirsoft.net/countryip/'
+            url += line.split('href="')[1].split('">')[0]
+            country = line.split('.html">')[1].split('</a>')[0]
+            yield url, country
+
+def get_range(url, country):
+    try:
+        f = open(country.replace(' ', '_'), 'w+')
+        http = requests.get(url=url, timeout=5)
+        for line in http.content.split('\n'):
+            if '<tr> <td>' in line:
+                for row in line.split('<tr> <td>'):
+                    if ' <td>' in row:
+                        column = row.split(' <td>')
+                        f.write('%s-%s\n' % (column[0], column[1]))
+        f.close()
+    except requests.exceptions.Timeout:
+        sys.stderr.write('You might have gotten blocked')
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--offset', help='Country offset to start at')
+    args = parser.parse_args()
+    download = False
+    if args.offset == None:
+        download = True
+    for url, country in get_country():
+        if download == True:
+            sys.stdout.write('country: %s\n' % country)
+            get_range(url, country)
+        if country.lower() == args.offset.lower():
+            download = True
