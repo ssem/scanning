@@ -1,21 +1,23 @@
 #!/usr/bin/env python
-import os
 import argparse
 import subprocess
 
 def run(pfile, rate, rfile, output):
+    ports = ''
     for line in open(pfile, 'r'):
         line = line.rstrip('\r\n')
         if line.startswith('#') or len(line) < 1:
             continue
         port = line.split(' ')[0]
         if len(port) > 0:
-            print '\nPort:%s\tRate:%s\tRange:%s' % (port, rate, rfile)
-            masscan(port, rate, rfile, os.path.join(output, port))
+            ports += '%s,' % port
+    ports = ports.rstrip(', ')
+    masscan(ports, rate, rfile, output)
 
-def masscan(port, rate, rfile, output):
+def masscan(ports, rate, rfile, output):
+    print 'masscan', '-p', ports, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'
     p = subprocess.Popen(
-        ['masscan', '-p', port, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'])
+        ['masscan', '-p', ports, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'])
     p.wait()
 
 if __name__ == "__main__":

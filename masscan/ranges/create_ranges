@@ -40,5 +40,5 @@ if __name__ == '__main__':
         if download == True:
             sys.stdout.write('country: %s\n' % country)
             get_range(url, country)
-        if country.lower() == args.offset.lower():
+        if args.offset and country.lower() == args.offset.lower():
             download = True
