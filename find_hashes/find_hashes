@@ -11,6 +11,11 @@ def run(stream, output):
         look_for_other(line, output)
 
 def look_for_hashes(line, output):
+    save_result('shha-1(base64)', re.finditer('^{SSHA}\S.*($|\s)', line), output)
+
+    save_result('sha-1(base64)', re.finditer('^{SHA}\S{27}=($|\s)', line), output)
+    save_result('cisco9', re.finditer('^\$9\$\S{58}($|\s)', line), output)
+    save_result('des', re.finditer('^\S{13}($|\s)', line), output)
     save_result('rawmd5-rawmd4-nt-lotus5', re.finditer('^\w{32}($|\s)', line), output)
     save_result('rawsha1-ripemd160-mysqlsha1', re.finditer('^\w{40}($|\s)', line), output)
     save_result('mysqluser-pixmd5user', re.finditer('^\w*:\w{16}($|\s)', line), output)

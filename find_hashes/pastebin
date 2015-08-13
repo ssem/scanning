@@ -33,12 +33,15 @@ class Pastebin():
 
 
     def scrape_archive(self):
-        http = requests.get(
-            url='http://pastebin.com/archive',
-            headers={'user-agent':self.quote})
-        for line in http.content.split('\n'):
-            if 'border="0" /><a href="/' in line:
-               yield line.split('<a href="/')[-1].split('">')[0]
+        try:
+            http = requests.get(
+                url='http://pastebin.com/archive',
+                headers={'user-agent':self.quote})
+            for line in http.content.split('\n'):
+                if 'border="0" /><a href="/' in line:
+                   yield line.split('<a href="/')[-1].split('">')[0]
+        except Exception as e:
+            sys.stderr.write(str(e))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
