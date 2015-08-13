@@ -283,7 +283,6 @@ class Smtp(Parent):
         except Exception as e:print '\n%s\n' % e
 
     def check_banner(self, banner):
-        # smtp
         if 'Exim' in banner:
             return 'OSVDB 69685'
         elif 'ESMTP TABS Mail Server for Windows NT' in banner:
@@ -296,12 +295,10 @@ class Smtp(Parent):
             return 'OSVDB 2674'
         elif 'Dovecot' in banner:
             return 'OSVDB 93004'
-        # pop3
         elif 'OK POP3 server' in banner:
             return 'OSVDB 11975'
         elif 'Cyrus' in banner:
             return 'OSVDB 25853'
-        # imap
         elif 'IMAP4rev1 v12.264' in banner:
             return 'OSVDB 12037'
         elif 'WorldMail' in banner:
@@ -333,7 +330,7 @@ class Http(Parent):
             banner = ''
             r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
             for field in r.headers:
-                banner += '%s: %s' % (field, r.headers[field])
+                banner += '%s: %s\n' % (field, r.headers[field])
             banner += r.content[:100]
             return banner
         except socket.error:pass
@@ -433,7 +430,7 @@ class Http(Parent):
         elif 'httpdx' in banner and 'Win32' in banner:
             return 'OSVDB 58714'
         elif 'Icecast ' in banner:
-            exploit  = 'OSVDB 10406'
+            return 'OSVDB 10406'
         elif 'intrasrv 1.0' in banner:
             return 'OSVDB 94097'
         elif 'Ipswitch-IMail/8.03' in banner:
@@ -562,7 +559,6 @@ class Http(Parent):
             return 'OSVDB 49663'
         else:
             return ''
-        return exploit
 
 class Mcafee(Http):
     default_port = 81
@@ -616,7 +612,7 @@ class Https(Http):
                 verify=False,
                 timeout=float(timeout))
             for field in r.headers:
-                banner += '%s:%s' % (field, r.headers[field])
+                banner += '%s:%s\n' % (field, r.headers[field])
             banner += r.content[:100]
             return banner
         except socket.error:pass
@@ -651,6 +647,8 @@ class Cups(Http):
     def check_banner(self, banner):
         if 'CUPS/' in banner:
             return 'CVE 2014-6271'
+        else:
+            return ''
 
 #class Rsync(Parent):
 #    default_port = 873
@@ -746,6 +744,8 @@ class Hp_Management(Http):
     def check_banner(self, banner):
         if 'HP System Management Homepage v' in banner:
             return 'OSVDB 91912'
+        else:
+            return ''
 
 class Mdaemon(Http):
     default_port = 3000
@@ -753,6 +753,8 @@ class Mdaemon(Http):
     def check_banner(self, banner):
         if 'WDaemon 6.8' in banner:
             return 'OSVDB 3255'
+        else:
+            return ''
 
 #class Novell(Parent):
 #    default_port = 3037
@@ -787,6 +789,8 @@ class AltN(Http):
     def check_banner(Self, banner):
         if 'SecurityGateway' in banner:
             return  'OSVDB 45854'
+        else:
+            return ''
 
 #class Sockso(Parent):
 #    default_port = 4444
@@ -800,6 +804,8 @@ class Eaton_Network(Http):
     def check_banner(self, banner):
         if 'This program makes use of the Zend' in banner:
             return 'OSVDB 25149'
+        else:
+            return ''
 
 class GlassFish(Http):
     default_port = 4848
@@ -807,6 +813,8 @@ class GlassFish(Http):
     def check_banner(self, banner):
         if 'GlassFish' in banner:
             return 'OSVDB 71948'
+        else:
+            return ''
 
 #class Windows_Deployment(Parent):
 #    default_port = 5040
@@ -887,6 +895,8 @@ class Netwin(Http):
     def check_banner(self, banner):
         if 'SurgeFTP' in banner:
             return 'OSVDB 89105'
+        else:
+            return ''
 
 class Peercast(Http):
     default_port = 7144
@@ -894,6 +904,8 @@ class Peercast(Http):
     def check_banner(self, banner):
         if 'peercast=' in banner:
             return 'OSVDB 23777'
+        else:
+            return ''
 
 
 #class Energizer(Parent):
@@ -911,6 +923,8 @@ class ManageEngine_Central(Http):
     def check_banner(self, banner):
         if 'ManageEngine Desktop Central' in banner:
             return 'OSVDB 100008'
+        else:
+            return ''
 
 class Http_Alternative(Http):
     default_port = 8080
@@ -936,6 +950,8 @@ class ManageEngine(Http):
     def check_banner(self, banner):
         if 'ManageEngine Desktop Central' in banner:
             return 'OSVDB 100008'
+        else:
+            return ''
 
 #class Nessus(Parent):
 #    default_port = 8834
@@ -955,6 +971,8 @@ class OpenFire(Http):
     def check_banner(self, banner):
         if 'Openfire, ' in banner:
             return 'OSVDB 49663'
+        else:
+            return ''
 
 #class Indices(Parent):
 #    default_port = 9200
@@ -971,6 +989,8 @@ class Lexmark(Http):
     def check_banner(self, banner):
         if 'MarkVision Enterprise' in banner:
             return 'CVE 2014-8741'
+        else:
+            return ''
 
 #class Lantronix(Http):
 #    default_port = 9999
