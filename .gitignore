@@ -6,5 +6,6 @@ malware/malshare/md5s.bk
 malware/malshare/found
 malware/malware/found
 find_hashes/found
+scan/bin/ranges
 *.pyc
 *.swp

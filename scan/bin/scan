@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+import argparse
+from scan.scanner import Scanner
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="scan a set of ranges")
+    parser.add_argument("ranges_dir", help="directory of ranges")
+    args = parser.parse_args()
+    scanner = Scanner()
+    scanner.scan_ranges(args.ranges_dir)

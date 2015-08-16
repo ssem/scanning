@@ -19,7 +19,7 @@ class Parent():
     def _worker(self, target, timeout):
         try:banner = self.get_banner(target['ip'], target['port'], timeout)
         except Exception as e:
-            sys.stdout.write(e)
+            #sys.stdout.write(str(e))
             banner = None
         if banner is not None and banner is not '':
             target['banner'] = banner.rstrip('\r\n')
