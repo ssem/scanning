@@ -1,3 +1,4 @@
+masscan/job*/
 masscan/ranges/*
 masscan/found
 malware/malshare/md5s

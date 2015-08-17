@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+import os
+import sys
+import json
+import time
+import shutil
+import struct
+import socket
+import argparse
+
+
+class Node:
+    def __init__(self, lower, upper, country):
+        self.lower = lower
+        self.upper = upper
+        self.country = country
+        self._left = None
+        self._right = None
+
+class Lookup:
+    def __init__(self):
+        self.binary_tree = None
+
+    def _add(self, node):
+        if self.binary_tree is None:
+            self.binary_tree = node
+        else:
+            self._recursive_add(node, self.binary_tree)
+
+    def _recursive_add(self, node, curser):
+        if node.lower < curser.lower:
+            if curser._left != None:
+                self._recursive_add(node, curser._left)
+            else:
+                curser._left = node
+        else:
+            if curser._right != None:
+                self._recursive_add(node, curser._right)
+            else:
+                curser._right = node
+
+    def _find(self, ip):
+        if self.binary_tree is not None:
+            try:return self._recursive_find(ip, self.binary_tree).country
+            except:return 'unknown'
+        else:
+            exit('\033[91m[-]\033[1;m Empty Tree\n')
+
+    def _recursive_find(self, ip, curser):
+        if ip < curser.lower and curser._left != None:
+            return self._recursive_find(ip, curser._left)
+        elif ip > curser.lower:
+            if ip < curser.upper:
+                return curser
+            elif curser._right != None:
+                return self._recursive_find(ip, curser._right)
+
+    def add_range_dir(self, range_dir):
+        for f in os.listdir(range_dir):
+            self.add_range_file(os.path.join(range_dir, f))
+
+    def add_range_file(self, range_file):
+        f = open(range_file, 'r')
+        for line in f:
+            try:
+                ip1, ip2 = line.split('-')
+                lower = int(struct.unpack('!I', socket.inet_aton(ip1))[0])
+                upper = int(struct.unpack('!I', socket.inet_aton(ip2))[0])
+                self._add(Node(lower, upper, os.path.basename(range_file)))
+            except ValueError: sys.stderr.write('\033[91m[-]\033[1;m RangeError invalid format: %s\n' % line)
+            except socket.error: sys.stderr.write('\033[91m[-]\033[1;m RangeError invalid ip address: %s\n' % line)
+        sys.stdout.write('\033[92m[+]\033[1;m Loaded: %s\n' % os.path.basename(range_file))
+
+    def add_country_to_fingerprint_file(self, fingerprint_file):
+        sys.stdout.write('\n\033[92m[+]\033[1;m performing lookups\n')
+        f = open('/tmp/tmp-%s' % os.path.basename(fingerprint_file), 'w+')
+        for line in open(fingerprint_file, 'r'):
+            try:
+                json_object = json.loads(line)
+                ip = int(struct.unpack('!I', socket.inet_aton(json_object['ip']))[0])
+                json_object['country'] = self._find(ip)
+                if json_object['country'] is 'unknown':
+                    sys.stderr.write('\033[91m[-]\033[1;m TreeError unkown country for: %s\n' % json_object['ip'])
+                f.write('%s\n' % json.dumps(json_object))
+            except KeyError: sys.stderr.write('\033[91m[-]\033[1;m FingerError invalid fingerprint object: %s\n' % line)
+            except ValueError: sys.stderr.write('\033[91m[-]\033[1;m FingerError invalid json object: %s\n' % line)
+            except ValueError: sys.stderr.write('\033[91m[-]\033[1;m FingerError invalid format: %s\n' % line)
+            except socket.error: sys.stderr.write('\033[91m[-]\033[1;m FingerError invalid ip address: %s\n' % line)
+        f.close()
+        shutil.move('/tmp/tmp-%s' % os.path.basename(fingerprint_file), fingerprint_file)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('fingerprint_file', help='fingerprint file')
+    parser.add_argument('range_dir', help='directory to store ranges')
+    args = parser.parse_args()
+    lookup = Lookup()
+    start = time.time()
+    lookup.add_range_dir(args.range_dir)
+    lookup.add_country_to_fingerprint_file(args.fingerprint_file)
+    sys.stdout.write('time: %s\n' % time.strftime("%H:%M:%S", time.gmtime(time.time() - start)))

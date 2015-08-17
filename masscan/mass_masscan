@@ -15,9 +15,9 @@ def run(pfile, rate, rfile, output):
     masscan(ports, rate, rfile, output)
 
 def masscan(ports, rate, rfile, output):
-    print 'masscan', '-p', ports, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'
+    print 'masscan', '--exclude', '255.255.255.255', '-p', ports, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'
     p = subprocess.Popen(
-        ['masscan', '-p', ports, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'])
+        ['masscan', '--exclude', '255.255.255.255', '-p', ports, '--rate', rate, '-iL', rfile, '-oL', output, '--connection-timeout', '100'])
     p.wait()
 
 if __name__ == "__main__":
