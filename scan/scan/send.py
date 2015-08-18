@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import sys
 import struct
 import socket
@@ -50,10 +49,10 @@ class Send:
         tcp_header = self._create_tcp_header(source_ip, dest_ip, source_port, dest_port)
         self.s.sendto(ip_header + tcp_header, (dest_ip, 0))
 
+
 if __name__ == "__main__":
-    send = Send()
-    source_ip = "192.168.1.110"
-    dest_ip = "63.88.73.122"
-    source_port = 56586
-    dest_port = 80
-    send.send_syn_packet(source_ip, dest_ip, source_port, dest_port)
+    s = Send()
+    import netaddr
+    #for ip in netaddr.iter_iprange("60.246.0.0", "60.246.255.255"):
+    #    s.send_syn_packet("172.16.5.118", ip, 58124, 80)
+    s.send_syn_packet("172.16.5.118", "63.88.73.122", 58124, 80)

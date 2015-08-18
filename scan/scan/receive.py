@@ -1,9 +1,6 @@
-#!/usr/bin/env python
 import sys
 import socket
 import struct
-import select
-import binascii
 
 class Receive:
     def __init__(self):
@@ -36,16 +33,21 @@ class Receive:
                 "checksum": header[7],
                 "urg pnt": header[8]}
 
-    def yield_all_ips(self):
-        while True:
-            return self.s.recvfrom(65565)[1][0]
-
-    def yield_synack_ips(self):
+    def yield_all(self):
         while True:
             packet, source = self.s.recvfrom(65565)
-            if self._unpack_tcp_header(packet)["flags"] == 18:
-                print source[0]
+            packet = self._unpack_tcp_header(packet)
+            yield source[0], packet['source port']
+
+    def yield_synack(self):
+        while True:
+            packet, source = self.s.recvfrom(65565)
+            tcp = self._unpack_tcp_header(packet)
+            if tcp['flags'] == 18 and tcp["dest port"] == 58124:
+                yield source[0], tcp["source port"]
+
 
 if __name__ == "__main__":
-        receive = Receive()
-        receive.yield_synack_ips()
+    r = Receive()
+    for ip, port in r.yield_synack():
+        sys.stdout.write("%s:%s\n" % (ip, port))
