@@ -3,6 +3,7 @@ import sys
 import json
 import time
 import socket
+import random
 import inspect
 try:import netaddr
 except:exit("Missing netaddr\nTry: sudo pip install netaddr\n")
@@ -40,6 +41,15 @@ class Scanner:
                 cm = classmember[1]()
                 banner_modules[int(cm.default_port)] = cm
         return banner_modules
+
+    def _iterate_random_ips(self, ranges_dir):
+        ips = []
+        for ip in self._iterate_random_ips(ranges_dir):
+            ips.append(ip)
+        while True:
+            ip = random.select(ips)
+            ips.remove(ip)
+            yield ip
 
     def _iterate_ips_and_country(self, ranges_dir):
         if not os.path.isdir(ranges_dir):
@@ -88,7 +98,7 @@ class Scanner:
             batch = []
             start = time.time()
             for port in self._iterate_ports(ports_file):
-                for ip, country in self._iterate_ips_and_country(ranges_dir):
+                for ip in self._iterate_random_ips(ranges_dir):
                     batch.append({"source_ip": self.my_ip,
                                   "dest_ip": str(ip),
                                   "dest_port": port})
