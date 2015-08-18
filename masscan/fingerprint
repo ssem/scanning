@@ -1006,7 +1006,7 @@ class Lexmark(Http):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="performs banner grabbing on masscan results")
     parser.add_argument('masscan_file', help="masscan output file")
     parser.add_argument('output_file', help="output file for results")
     parser.add_argument('--rate', default="20",

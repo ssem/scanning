@@ -21,7 +21,7 @@ def masscan(ports, rate, rfile, output):
     p.wait()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="simple masscan wrapper")
     parser.add_argument("pfile", help="port file")
     parser.add_argument("rate", help="packets per sec")
     parser.add_argument("rfile", help="range file")
