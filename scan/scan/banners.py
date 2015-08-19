@@ -7,54 +7,25 @@ import socket
 import inspect
 import argparse
 import requests
-import multiprocessing
 
 
 class Parent():
     def __init__(self):
-        self.threads = []
         self.blacklist_ips = []
-        self.queue = multiprocessing.Queue()
-        self.janitor = multiprocessing.Process(target=self._janitor)
-        self.janitor.daemon = True
-        self.janitor.start()
 
-    def __del__(self):
-        for thread in self.threads:
-            try:thread["thread"].kill()
-            except:pass
-        try:self.janitor.kill()
-        except:pass
-
-    def _janitor(self, timeout=10):
-        while True:
-            current = time.time()
-            for thread in self.threads:
-                if current - thread["start time"] > timeout:
-                    try:thread["thread"].kill()
-                    except:pass
-                    try:self.threads.remove(thread)
-                    except:pass
-            time.sleep(1)
-
-    def _worker(self, ip, port, queue, timeout=10):
-        try:banner = self.get_banner(ip, port, timeout)
-        except:banner = None
-        if banner is not None and banner is not "":
-            banner = banner.rstrip('\r\n')
-            exploit = self.check_banner(banner)
-            queue.put({"ip": ip,
-                       "port": port,
-                       "banner": banner,
-                       "exploit": exploit,
-                       "time": time.time()})
-
-    def run(self, ip, port):
-        t = multiprocessing.Process(target=self._worker,
-                                    args=(ip, port, self.queue))
-        t.daemon = True
-        t.start()
-        self.threads.append({"thread": t, "start time": time.time()})
+    def run(self, ip, port, timeout=10):
+        if ip not in self.blacklist_ips:
+            try:banner = self.get_banner(ip, port, timeout)
+            except:banner = None
+            if banner is not None and banner is not "":
+                banner = banner.rstrip('\r\n')
+                exploit = self.check_banner(banner)
+                return {"ip": ip,
+                        "port": port,
+                        "banner": banner,
+                        "exploit": exploit,
+                        "time": time.time()}
+        return None
 
     def get_banner(self, ip, port, timeout=10):
         raise Exception('Not Implemented')
