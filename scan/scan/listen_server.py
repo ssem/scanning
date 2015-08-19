@@ -30,6 +30,7 @@ class Listen_Server:
                 cm = classmember[1]()
                 banner_modules[int(cm.default_port)] = cm
         for ip, port in self._receive.yield_synack():
+            try:
                 banner_module = banner_modules[int(port)]
                 result = banner_module.run(ip, port)
                 if result:
@@ -37,6 +38,7 @@ class Listen_Server:
                     output.write("%s\n" % result)
                     output.flush()
                     queue.put(1)
+            except:pass
 
     def listen(self, range_dir, output):
         self.country_lookup.add_range_dir(range_dir)
