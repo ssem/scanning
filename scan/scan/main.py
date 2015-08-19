@@ -3,13 +3,11 @@ import sys
 import time
 from scan.scan_server import Scan_Server
 from scan.listen_server import Listen_Server
-from scan.country_lookup import Country_Lookup
 
 class Main:
     def __init__(self):
         self.scan_server = Scan_Server()
         self.listen_server = Listen_Server()
-        self.country_lookup = Country_Lookup()
 
     def _print_status(self):
         total = self.scan_server.total
@@ -23,8 +21,7 @@ class Main:
 
     def run(self, range_dir, port_file, rate, outfile):
         try:
-            self.country_lookup.add_range_dir(range_dir)
-            self.listen_server.listen(outfile)
+            self.listen_server.listen(range_dir, outfile)
             self.scan_server.scan(range_dir, port_file, rate)
             while self.scan_server.is_alive():
                 self._print_status()

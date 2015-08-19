@@ -4,10 +4,13 @@ import argparse
 import multiprocessing
 from scan import banners
 from scan.raw_sock import Receive
+from scan.country_lookup import Country_Lookup
+
 
 class Listen_Server:
     def __init__(self):
         self.listen_server = None
+        self.country_lookup = Country_Lookup()
         self._receive = Receive()
         self._received_q = multiprocessing.Queue()
         self._received = 0
@@ -27,16 +30,16 @@ class Listen_Server:
                 cm = classmember[1]()
                 banner_modules[int(cm.default_port)] = cm
         for ip, port in self._receive.yield_synack():
-            try:
                 banner_module = banner_modules[int(port)]
-                results = banner_module.run(ip, port)
-                if results:
-                    output.write("%s\n" % results)
+                result = banner_module.run(ip, port)
+                if result:
+                    result['country'] = self.country_lookup.find(ip)
+                    output.write("%s\n" % result)
                     output.flush()
                     queue.put(1)
-            except:pass
 
-    def listen(self, output):
+    def listen(self, range_dir, output):
+        self.country_lookup.add_range_dir(range_dir)
         self.listen_server = multiprocessing.Process(
             target=self._listen_server,
             args=(output, self._received_q))
