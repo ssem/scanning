@@ -1,6 +1,7 @@
 import sys
 import struct
 import socket
+import select
 
 
 class Send:
@@ -84,13 +85,21 @@ class Receive:
 
     def yield_all(self):
         while True:
-            packet, source = self.s.recvfrom(65565)
-            packet = self._unpack_tcp_header(packet)
-            yield source[0], packet['source port']
+            try:
+                inp, outp, execption = select.select([self.s], [], [])
+                for sock in inp:
+                    packet, source = sock.recvfrom(4096)
+                    packet = self._unpack_tcp_header(packet)
+                    yield source[0], packet['source port']
+            except:pass
 
     def yield_synack(self):
         while True:
-            packet, source = self.s.recvfrom(65565)
-            tcp = self._unpack_tcp_header(packet)
-            if tcp['flags'] == 18 and tcp["dest port"] == 58124:
-                yield source[0], tcp["source port"]
+            try:
+                inp, outp, execption = select.select([self.s], [], [])
+                for sock in inp:
+                    packet, source = sock.recvfrom(4096)
+                    tcp = self._unpack_tcp_header(packet)
+                    if tcp['flags'] == 18 and tcp["dest port"] == 58124:
+                        yield source[0], tcp["source port"]
+            except:pass
