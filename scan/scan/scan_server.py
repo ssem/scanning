@@ -30,19 +30,22 @@ class Scan_Server:
         return my_ip
 
     def _randomizer(self, ranges):
-        largest = 0
-        for r in ranges:
-            if r['count'] > largest:
-                largest = r['count']
-        for x in random.sample(range(largest), largest):
-            for r in ranges:
-                ip = r['start'] + x
-                if ip <= r['end']:
-                    try:yield socket.inet_ntoa(struct.pack('!L', ip))
-                    except Exception as e:
-                        sys.stderr.write("%s\n" % e)
+        jump = 437
+        for offset in reversed(xrange(jump)):
+            for rang in ranges:
+                count = 0
+                done = False
+                while not done:
+                    ip = rang['start'] + (count * jump + offset)
+                    if ip <= rang['end']:
+                        try:yield socket.inet_ntoa(struct.pack('!L', ip))
+                        except:pass
+                    else:
+                        done = True
+                    count += 1
 
     def _get_ranges(self, ranges_dir):
+        total = 0
         ranges = []
         if not os.path.isdir(ranges_dir):
             exit("Range_dir options is not a Directory")
@@ -53,14 +56,13 @@ class Scan_Server:
                         start, end = line.split('-')
                         start = struct.unpack("!L", socket.inet_aton(start))[0]
                         end = struct.unpack("!L", socket.inet_aton(end))[0]
-                        count = end - start + 1
-                        ranges.append({"start":start, "end":end,
-                                       "count":count, "country":country})
+                        total += end - start + 1
+                        ranges.append({"start":start, "end":end, "country":country})
                     except ValueError:
                         sys.stderr.write("invalid range: %s\n" % line.rstrip("\n"))
                     except Exception as e:
                         sys.stderr.write(str(e))
-        return ranges
+        return ranges, total
 
     def _get_ports(self, ports_file):
         ports = []
@@ -76,31 +78,32 @@ class Scan_Server:
                     sys.stderr.write(str(e))
         return ports
 
-    def _scan(self, ranges, ports, rate, queue):
+    def _scan(self, ranges_dir, ports_file, rate, queue):
+        start = time.time()
         rate = int(rate) * 2
         attempts = 0
-        start = time.time()
+        ranges, total = self._get_ranges(ranges_dir)
+        ports = self._get_ports(ports_file)
+        queue.put(total * len(ports))
         for port in ports:
             for ip in self._randomizer(ranges):
-                self._send.send_syn_packet(self.my_ip, ip, 58124, port)
-                attempts += 1
-                queue.put(1)
-                if attempts % rate == 0:
-                    try:time.sleep(2 - (time.time() - start))
-                    except:pass
-                    start = time.time()
+                try:
+                    self._send.send_syn_packet(self.my_ip, ip, 58124, port)
+                    attempts += 1
+                    queue.put(1)
+                    if attempts % rate == 0:
+                        try:time.sleep(2 - (time.time() - start))
+                        except:pass
+                        start = time.time()
+                except:pass
 
     def scan(self, ranges_dir, ports_file, rate):
-        ranges = self._get_ranges(ranges_dir)
-        for r in ranges:
-            self.total += r['count']
-        ports = self._get_ports(ports_file)
-        self.total = self.total * len(ports)
         self.scan_server = multiprocessing.Process(
             target=self._scan,
-            args=(ranges, ports, rate, self._attempts_q))
+            args=(ranges_dir, ports_file, rate, self._attempts_q))
         self.scan_server.daemon = True
         self.scan_server.start()
+        self.total = self._attempts_q.get()
         print "\033[92m[+]\033[1;m Scanning"
 
     def wait(self, timeout=None):
