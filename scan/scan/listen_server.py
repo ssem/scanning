@@ -21,15 +21,6 @@ class Listen_Server:
             self._received += self._received_q.get()
         return self._received
 
-    def _banner_grab_and_lookups(self, ip, port, country_lookup, output):
-        banner_module = banner_modules[int(port)]
-        result = banner_module.run(ip, port)
-        if result:
-            result['country'] = country_lookup.find(ip)
-            output.write("%s\n" % result)
-            output.flush()
-            queue.put(1)
-
     def _listen_server(self, range_dir, output, queue):
         output = open(output, "a")
         country_lookup = Country_Lookup()
@@ -42,7 +33,14 @@ class Listen_Server:
                 banner_modules[int(cm.default_port)] = cm
         queue.put("ready")
         for ip, port in self._receive.yield_synack():
-            try:self._banner_grab_and_lookups(ip, port, country_lookup, output)
+            try:
+                banner_module = banner_modules[int(port)]
+                result = banner_module.run(ip, port)
+                if result:
+                    result['country'] = country_lookup.find(ip)
+                    output.write("%s\n" % result)
+                    output.flush()
+                    queue.put(1)
             except:pass
         output.close()
 
