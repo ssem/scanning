@@ -9,7 +9,7 @@ class Pastebin():
         self.path = path
         self.quote = "Soon, I'm going to meet somebody around my own age, "
         self.quote += "and she's going to be smart and beautiful, "
-        self.quote += "and I'm going to date her daughter."
+        self.quote += "and I'm going to date her daughter. -Bob Saget"
 
     def run(self):
         for page in self.scrape_archive():

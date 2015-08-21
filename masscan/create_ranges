@@ -7,11 +7,8 @@ import argparse
 def run(range_dir):
     done = os.listdir(range_dir)
     for url, country in get_country():
-        if country not in done:
-            sys.stdout.write('%s\n' % country)
+        if country.replace(' ', '_') not in done:
             get_range(range_dir, url, country)
-        else:
-            sys.stdout.write('Skipping: %s\n' % country)
 
 def get_country():
     try:http = requests.get(url='http://www.nirsoft.net/countryip/', timeout=5)
@@ -27,8 +24,8 @@ def get_country():
 def get_range(range_dir, url, country):
     output = os.path.join(range_dir, country.replace(' ', '_'))
     try:
-        f = open(output, 'w+')
         http = requests.get(url=url, timeout=5)
+        f = open(output, 'w+')
         for line in http.content.split('\n'):
             if '<tr> <td>' in line:
                 for row in line.split('<tr> <td>'):
@@ -36,12 +33,16 @@ def get_range(range_dir, url, country):
                         column = row.split(' <td>')
                         f.write('%s-%s\n' % (column[0], column[1]))
         f.close()
+        statinfo = os.stat(output)
+        if statinfo.st_size < 1:
+            os.remove(output)
+        else:
+            sys.stdout.write('%s\n' % country)
     except requests.exceptions.Timeout:
-        os.remove(output)
         sys.stderr.write('You might have gotten blocked')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="scrape ip address ranges and places them in files per country")
+    parser = argparse.ArgumentParser()
     parser.add_argument('range_dir', help='directory to store ranges')
     args = parser.parse_args()
     run(args.range_dir)
