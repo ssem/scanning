@@ -90,7 +90,7 @@ class Lookup:
         shutil.move('/tmp/tmp-%s' % os.path.basename(fingerprint_file), fingerprint_file)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="add country to fingerprint results")
     parser.add_argument('fingerprint_file', help='fingerprint file')
     parser.add_argument('range_dir', help='directory to store ranges')
     args = parser.parse_args()

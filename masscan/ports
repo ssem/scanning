@@ -1,0 +1,110 @@
+0       # honeypots
+19      # chargen_probe
+21      # ftp
+22      # ssh
+23      # telnet
+25      # smtp
+80      # http
+81      # mcafee
+107     # remote telnet
+110     # pop3
+143     # imap
+443     # https
+631     # cups
+2380    # goodtech
+2381    # hp management
+3000    # mdaemon
+4000    # altn
+4679    # eaton network
+4848    # glassfish
+6200    # vsftp
+7021    # netwin
+7144    # peercast
+8020    # manageengine_central
+8080    # http_alternative
+8400    # manageengine
+8888    # http_alternative2
+9090    # openfire
+9788    # lexmark
+
+#445     # smb
+#502     # modbus
+#512     # rexec
+#513     # rlogin
+#514     # rsh
+#523     # db2
+#548     # apple file protocol
+#873     # rsync
+#902     # vmauthd
+#998     # zenworks
+#1099    # java_rmi
+#1128    # sap
+#1158    # sid
+#1170    # nj rat
+#1241    # nessus
+#1336    # jrat
+#1521    # tns
+#1604    # dark comet
+#1720    # h323
+#2049    # network file system
+#2067    # dlsw
+#2362    # digi
+#3037    # novell
+#3050    # ib
+#3283    # apple remote desktop
+#3299    # sap
+#3306    # mysql
+#3460    # posion ivy
+#3500    # alphastor
+#3780    # nexpose
+#3790    # msf
+#4444    # sockso
+#4672    # kademlia
+#5040    # windows deployment
+#5060    # sip
+#5432    # postgres
+#5560    # isqlplus
+#5631    # pcanywhere
+#5900    # vnc
+#5920    # cctv
+#5984    # couchdb
+#6000    # x11
+#6060    # manageengine
+#6129    # dameware
+#6379    # redis
+#6405    # sap
+#7181    # groupwise
+#7777    # energizer
+#8000    # soap
+#8008    # chomecast
+#8086    # influxdb
+#8087    # netdecision
+#8095    # atlassian
+#8161    # apache
+#8222    # vmware
+#8834    # nessus
+#9000    # raysharp
+#9200    # indices
+#9084    # vmware
+#9390    # openvas
+#9391    # openvas
+#9999    # lantronix
+#10001   # jspy
+#12345   # netbus
+#13364   # rosewill
+#17185   # wdbrpc
+#27015   # steam
+#27017   # mongodb
+#27374   # sub7
+#27960   # quake
+#28784   # koyo
+#30718   # lantronix
+#31001   # titan ftp
+#31337   # back orifice
+#32764   # sercomm
+#41080   # symantic
+#46824   # sielco
+#49152   # smt
+#50000   # sap
+#50013   # sap
+#55553   # msf

@@ -41,7 +41,7 @@ def get_range(range_dir, url, country):
         sys.stderr.write('You might have gotten blocked')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="scrape ip address ranges and places them in files per country")
     parser.add_argument('range_dir', help='directory to store ranges')
     args = parser.parse_args()
     run(args.range_dir)
