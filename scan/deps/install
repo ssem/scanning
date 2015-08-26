@@ -1,0 +1,7 @@
+#!/bin/bash
+
+### python-netaddr ###
+sudo pip install netaddr
+
+### requests ###
+sudo pip install requests

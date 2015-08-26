@@ -7,73 +7,54 @@ import socket
 import inspect
 import argparse
 import requests
-import threading
+import multiprocessing
+
 
 class Parent():
     def __init__(self):
-        self.results = []
         self.threads = []
-        self.attempts = 0
-        self.blacklist_ips = {}
+        self.blacklist_ips = []
+        self.queue = multiprocessing.Queue()
+        self.janitor = multiprocessing.Process(target=self._janitor)
+        self.janitor.daemon = True
+        self.janitor.start()
 
-    def _worker(self, target, timeout):
-        try:banner = self.get_banner(target['ip'], target['port'], timeout)
-        except Exception as e:
-            #sys.stdout.write(str(e))
-            banner = None
-        if banner is not None and banner is not '':
-            target['banner'] = banner.rstrip('\r\n')
-            target['exploit'] = self.check_banner(banner)
-            self.results.append(target)
+    def __del__(self):
+        for thread in self.threads:
+            try:thread["thread"].kill()
+            except:pass
+        try:self.janitor.kill()
+        except:pass
 
-    def blacklist(self, honeypots):
-        for honeypot in honeypots:
-            self.blacklist_ips[honeypot['ip']] = ''
+    def _janitor(self, timeout=10):
+        while True:
+            current = time.time()
+            for thread in self.threads:
+                if current - thread["start time"] > timeout:
+                    try:thread["thread"].kill()
+                    except:pass
+                    try:self.threads.remove(thread)
+                    except:pass
+            time.sleep(1)
 
-    def run(self, targets, rate=20, timeout=10):
-        try:
-            start = time.time()
-            self.print_info(targets[0]['port'])
-            for target in targets:
-                if (time.time() - start) > 2:
-                    start = time.time()
-                    self.print_info(targets[0]['port'])
-                if target['ip'] not in self.blacklist_ips:
-                    t = threading.Thread(target=self._worker, args=(target, timeout))
-                    t.daemon = True
-                    t.start()
-                    self.attempts += 1
-                    self.threads.append(t)
-                    time.sleep(1/float(rate))
-            self.print_info(targets[0]['port'])
-            sys.stdout.write('\n')
-        except KeyboardInterrupt:
-            exit('bye')
+    def _worker(self, ip, port, queue, timeout=10):
+        try:banner = self.get_banner(ip, port, timeout)
+        except:banner = None
+        if banner is not None and banner is not "":
+            banner = banner.rstrip('\r\n')
+            exploit = self.check_banner(banner)
+            queue.put({"ip": ip,
+                       "port": port,
+                       "banner": banner,
+                       "exploit": exploit,
+                       "time": time.time()})
 
-    def print_info(self, port):
-        sys.stdout.write('\b' * 1000)
-        good = len(self.results)
-        bad = self.attempts - good
-        sys.stdout.write('PORT:{:<15}ATTEMPTS:{:<15}BANNERS:{:<15}ERRORS:{:<15}'.format(
-            port, self.attempts, good, bad))
-
-    def wait(self, timeout=10):
-        try:
-            start = time.time()
-            while len(self.threads) > 0:
-                message = 'WAITING FOR THREADS: %s' % len(self.threads)
-                sys.stdout.write('\b' * len(message))
-                sys.stdout.write(message)
-                new_list = []
-                for thread in self.threads:
-                    if thread.is_alive():
-                        new_list.append(thread)
-                self.threads = new_list
-                time.sleep(1)
-                if (time.time() - start) > timeout:
-                    self.threads = [] # <<< thread leak this needs to be fixed
-        except KeyboardInterrupt:
-            exit('Bye')
+    def run(self, ip, port):
+        t = multiprocessing.Process(target=self._worker,
+                                    args=(ip, port, self.queue))
+        t.daemon = True
+        t.start()
+        self.threads.append({"thread": t, "start time": time.time()})
 
     def get_banner(self, ip, port, timeout=10):
         raise Exception('Not Implemented')
@@ -742,9 +723,9 @@ class Mdaemon(Http):
 class AltN(Http):
     default_port = 4000
 
-    def check_banner(Self, banner):
+    def check_banner(self, banner):
         if 'SecurityGateway' in banner:
-            return  'OSVDB 45854'
+            return 'OSVDB 45854'
         else:
             return ''
 
@@ -1003,46 +984,3 @@ class Lexmark(Http):
 
 #class Msf_Rpc(Parent):
 #    default_port = 55553
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="performs banner grabbing on masscan results")
-    parser.add_argument('masscan_file', help="masscan output file")
-    parser.add_argument('output_file', help="output file for results")
-    parser.add_argument('--rate', default="20",
-        help="scan interval per sec (DEFAULT:20)")
-    parser.add_argument('--timeout', default="10",
-        help="connection timeout (DEFAULT:10)")
-    args = parser.parse_args()
-    # create module lookup table by port number
-    lookup_table = {}
-    classmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-    for classmember in classmembers:# load all classes
-        if classmember[0] != "Parent":
-            cm = classmember[1]()
-            lookup_table[int(cm.default_port)] = cm
-    # arrange targets by port number
-    ports = {'0':[]}
-    for line in open(args.masscan_file):
-        if not line.startswith('#'):
-            try:
-                status, protocol, port, ip, time_scanned = line.split(' ')
-                target = {'protocol': protocol, 'port': port, 'ip': ip,
-                          'time': time.strftime('%d %b %y %H:%M:%S', time.localtime(float(time_scanned)))}
-                if port in ports:
-                    ports[port].append(target)
-                else:
-                    ports[port] = [target]
-            except ValueError:sys.stdout.write('[-] FormatError: %s\n' % line)
-    # run all targets according to port number
-    f = open(args.output_file, 'w+')
-    for port in ports:
-        if port is not '0':
-            module = lookup_table[int(port)]
-            module.blacklist(ports['0'])
-            module.run(ports[port], args.rate, int(args.timeout))
-            module.wait(int(args.timeout))
-            for result in module.results:
-                try:f.write('%s\n' % json.dumps(result))
-                except:pass
-    f.close()

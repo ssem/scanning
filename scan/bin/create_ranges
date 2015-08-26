@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+import os
+import sys
+import requests
+import argparse
+
+def run(range_dir):
+    done = os.listdir(range_dir)
+    for url, country in get_country():
+        if country not in done:
+            sys.stdout.write('%s\n' % country)
+            get_range(range_dir, url, country)
+        else:
+            sys.stdout.write('Skipping: %s\n' % country)
+
+def get_country():
+    try:http = requests.get(url='http://www.nirsoft.net/countryip/', timeout=5)
+    except requests.exceptions.Timeout:
+        exit('\n\tBlocked from http://www.nirsoft.net/countryip/?\r\n')
+    for line in http.content.split('\n'):
+        if '<td><a href="' in line:
+            url = 'http://www.nirsoft.net/countryip/'
+            url += line.split('href="')[1].split('">')[0]
+            country = line.split('.html">')[1].split('</a>')[0]
+            yield url, country
+
+def get_range(range_dir, url, country):
+    output = os.path.join(range_dir, country.replace(' ', '_'))
+    try:
+        f = open(output, 'w+')
+        http = requests.get(url=url, timeout=5)
+        for line in http.content.split('\n'):
+            if '<tr> <td>' in line:
+                for row in line.split('<tr> <td>'):
+                    if ' <td>' in row:
+                        column = row.split(' <td>')
+                        f.write('%s-%s\n' % (column[0], column[1]))
+        f.close()
+    except requests.exceptions.Timeout:
+        os.remove(output)
+        sys.stderr.write('You might have gotten blocked')
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('range_dir', help='directory to store ranges')
+    args = parser.parse_args()
+    run(args.range_dir)
