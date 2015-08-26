@@ -2,11 +2,10 @@ import os
 import sys
 import json
 import time
+import struct
 import socket
 import random
 import inspect
-try:import netaddr
-except:exit("Missing netaddr\nTry: sudo pip install netaddr\n")
 import multiprocessing
 from scan import banners
 from scan.send import Send
@@ -42,27 +41,30 @@ class Scanner:
                 banner_modules[int(cm.default_port)] = cm
         return banner_modules
 
-    def _iterate_random_ips(self, ranges_dir):
-        ips = []
-        for ip in self._iterate_random_ips(ranges_dir):
-            ips.append(ip)
-        while True:
-            ip = random.select(ips)
-            ips.remove(ip)
-            yield ip
+    def _random_ip_helper(self, ranges):
+        for count in random.sample(range(16277214), 16277214):
+            for start in ranges:
+                if start + count < ranges[start]["end"]:
+                    ip =  socket.inet_ntoa(struct.pack('!L', start + count))
+                    yield ip, ranges[start]["country"]
 
     def _iterate_ips_and_country(self, ranges_dir):
+        ranges = {}
         if not os.path.isdir(ranges_dir):
             exit("Range_dir options is not a Directory")
         for country in os.listdir(ranges_dir):
             for line in open(os.path.join(ranges_dir, country), 'r'):
                 if not line.startswith("#"):
-                    try:start, end = line.split('-')
+                    try:
+                        start, end = line.split('-')
+                        start = struct.unpack("!L", socket.inet_aton(start))[0]
+                        end = struct.unpack("!L", socket.inet_aton(end))[0]
+                        ranges[start] = {"end": end, "country":country}
                     except ValueError:
                         sys.stderr.write("invalid range: %s\n" % line.rstrip("\n"))
                         continue
-                    for ip in netaddr.iter_iprange(start, end):
-                        yield ip, country
+        for ip, country in self._random_ip_helper(ranges):
+            yield ip, country
 
     def _iterate_ports(self, ports_file):
         if not os.path.isfile(ports_file):
@@ -98,7 +100,7 @@ class Scanner:
             batch = []
             start = time.time()
             for port in self._iterate_ports(ports_file):
-                for ip in self._iterate_random_ips(ranges_dir):
+                for ip, country in self._iterate_ips_and_country(ranges_dir):
                     batch.append({"source_ip": self.my_ip,
                                   "dest_ip": str(ip),
                                   "dest_port": port})
