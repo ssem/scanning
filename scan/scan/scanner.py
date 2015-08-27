@@ -120,8 +120,10 @@ class Scanner:
 
     def _listen_server(self, ranges_dir, output):
         for ip, port in self._receive.yield_synack():
-            banner_module = self._banner_modules[int(port)]
-            banner_module.run(ip, port)
+            try:
+                banner_module = self._banner_modules[int(port)]
+                banner_module.run(ip, port)
+            except:pass
 
     def _collect_results(self, output):
         received = 0
