@@ -3,8 +3,8 @@ import sys
 import time
 from datetime import datetime
 from datetime import timedelta
-from scan.scan_server import Scan_Server
-from scan.listen_server import Listen_Server
+from slowscan.scan_server import Scan_Server
+from slowscan.listen_server import Listen_Server
 
 class Main:
     def __init__(self):

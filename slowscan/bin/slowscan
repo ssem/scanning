@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-from scan.main import Main
+from slowscan.main import Main
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="scan a set of ranges")

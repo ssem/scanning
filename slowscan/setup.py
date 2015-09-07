@@ -2,9 +2,9 @@
 
 from distutils.core import setup
 
-setup(name="scan",
-      version="1",
+setup(name="slowscan",
+      version="alpha",
       author="ssem",
       scripts=["bin/create_ranges",
-               "bin/scan"],
-      packages=["scan"],)
+               "bin/slowscan"],
+      packages=["slowscan"],)

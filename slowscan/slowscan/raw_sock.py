@@ -9,6 +9,7 @@ class Send:
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
             self.s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+            self.s.setblocking(0)
         except socket.error:
             sys.exit("Socket could not be created")
 
@@ -49,6 +50,8 @@ class Send:
         ip_header = self._create_ip_header(source_ip, dest_ip)
         tcp_header = self._create_tcp_header(source_ip, dest_ip, source_port, dest_port)
         try:self.s.sendto(ip_header + tcp_header, (dest_ip, 0))
+        except:pass
+        try:self.s.shutdown(socket.SHUT_RD)
         except:pass
 
 

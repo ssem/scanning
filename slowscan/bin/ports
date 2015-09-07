@@ -1,31 +1,30 @@
-80      # http
-21      # ftp
-8080    # http_alternative
-22      # ssh
-110     # pop3
-143     # imap
-443     # https
-8888    # http_alternative2
-23      # telnet
-25      # smtp
-81      # mcafee
-107     # remote telnet
-631     # cups
-2380    # goodtech
-2381    # hp management
-3000    # mdaemon
-4000    # altn
-4679    # eaton network
-4848    # glassfish
-6200    # vsftp
-7021    # netwin
-7144    # peercast
-8020    # manageengine_central
-8400    # manageengine
-9090    # openfire
-9788    # lexmark
-19      # chargen_probe
-
+#80      # http
+#21      # ftp
+#8080    # http_alternative
+#22      # ssh
+#110     # pop3
+#143     # imap
+#443     # https
+#8888    # http_alternative2
+#23      # telnet
+#25      # smtp
+#81      # mcafee
+#107     # remote telnet
+#631     # cups
+#2380    # goodtech
+#2381    # hp management
+#3000    # mdaemon
+#4000    # altn
+#4679    # eaton network
+#4848    # glassfish
+#6200    # vsftp
+#7021    # netwin
+#7144    # peercast
+#8020    # manageengine_central
+#8400    # manageengine
+#9090    # openfire
+#9788    # lexmark
+#19      # chargen_probe
 #445     # smb
 #502     # modbus
 #512     # rexec

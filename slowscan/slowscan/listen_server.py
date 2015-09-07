@@ -3,9 +3,9 @@ import inspect
 import argparse
 import threading
 import multiprocessing
-from scan import banners
-from scan.raw_sock import Receive
-from scan.country_lookup import Country_Lookup
+from slowscan import banners
+from slowscan.raw_sock import Receive
+from slowscan.country_lookup import Country_Lookup
 
 
 class Listen_Server:

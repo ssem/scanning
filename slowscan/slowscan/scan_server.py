@@ -6,7 +6,7 @@ import socket
 import random
 import argparse
 import multiprocessing
-from scan.raw_sock import Send
+from slowscan.raw_sock import Send
 
 class Scan_Server:
     def __init__(self):
