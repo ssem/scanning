@@ -5,7 +5,7 @@ from slowscan.main import Main
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="scan a set of ranges")
     parser.add_argument("ranges_dir", help="directory of ranges")
-    parser.add_argument("port_file", help="file full of ports")
+    parser.add_argument("port_file", help="file of ports numbers")
     parser.add_argument("outfile", help="output file")
     parser.add_argument("--rate", default=100,
         help="ips to scan per second (DEFAULT: 100)")

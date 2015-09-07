@@ -39,10 +39,11 @@ def get_range(range_dir, url, country):
         else:
             sys.stdout.write('%s\n' % country)
     except requests.exceptions.Timeout:
-        sys.stderr.write('You might have gotten blocked')
+        sys.stderr.write('You might have gotten blocked\n')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('range_dir', help='directory to store ranges')
     args = parser.parse_args()
-    run(args.range_dir)
+    try:run(args.range_dir)
+    except KeyboardInterrupt:pass
