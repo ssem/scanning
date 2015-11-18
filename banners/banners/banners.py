@@ -13,19 +13,21 @@ class Parent():
     def __init__(self):
         self.blacklist_ips = []
 
-    def run(self, ip, port, timeout=10):
+    def run(self, ip, port, timeout=0.5):
         if ip not in self.blacklist_ips:
             try:banner = self.get_banner(ip, port, timeout)
-            except:banner = None
-            if banner is not None and banner is not "":
-                banner = banner.rstrip('\r\n')
-                exploit = self.check_banner(banner)
-                return {"ip": ip,
-                        "port": port,
-                        "banner": banner,
-                        "exploit": exploit,
-                        "time": time.time()}
-        return None
+            except KeyboardInterrupt:raise KeyboardInterrupt
+            except:banner = ""
+            if banner == "":
+                exploit, category = "",""
+            else:
+                exploit, category = self.check_banner(banner)
+            return {"ip": ip,
+                    "port": port,
+                    "banner": banner.rstrip('\r\n'),
+                    "exploit": exploit,
+                    "category": category,
+                    "time": time.time()}
 
     def get_banner(self, ip, port, timeout=10):
         raise Exception('Not Implemented')
@@ -46,7 +48,7 @@ class HoneyPot(Parent):
         return banner
 
     def check_banner(self, banner):
-        return 'Honeypot'
+        return 'Honeypot', []
 
 class Chargen(Parent):
     default_port = 19
@@ -60,7 +62,7 @@ class Chargen(Parent):
         return banner
 
     def check_banner(self, banner):
-        return 'OSVDB 150'
+        return 'OSVDB 150', []
 
 class Ftp(Parent):
     default_port = 21
@@ -75,75 +77,75 @@ class Ftp(Parent):
 
     def check_banner(self, banner):
         if "ProFTPD 1.3" in banner:
-            return "OSVDB 68985"
+            return "OSVDB 68985", ["ftp", "linux", "metasploit"]
         elif "Pure-FTPd" in banner:
-            return "OSVDB 112004"
+            return "OSVDB 112004", ["ftp", "linux", "osx", "metasploit"]
         elif "Version wu-2" in banner:
-            return 'OSVDB 11805'
+            return 'OSVDB 11805', ["ftp", "metasploit"]
         elif "Webstar" in banner:
-            return "OSVDB 7794"
+            return "OSVDB 7794", ["ftp", "osx", "metasploit"]
         elif "(vsFTPd 2.3.4)" in banner:
-            return "OSVDB 73573"
+            return "OSVDB 73573", ["ftp", "linux", "metasploit"]
         elif '3Com 3CDaemon FTP' in banner:
-            return 'OSVDB 12811'
+            return 'OSVDB 12811', ["ftp", "windows", "metasploit"]
         elif 'Ability FTP' in banner:
-            return 'OSVDB 11030'
+            return 'OSVDB 11030', ["ftp", "windows", "metasploit"]
         elif 'AbsoluteFTP' in banner:
-            return 'OSVDB 77105'
+            return 'OSVDB 77105', ["ftp", "windows", "metasploit"]
         elif 'CasarFTP 0.99g' in banner:
-            return 'OSVDB 26364'
+            return 'OSVDB 26364', ["ftp", "windows", "metasploit"]
         elif "\x32\x32\x30\x20\xbb\xb6\xd3\xad\xb9\xe2\xc1\xd9\x46" in banner:
-            return 'OSVDB 82798'
+            return 'OSVDB 82798', ["ftp", "windows", "metasploit"]
         elif 'Dream FTP Server' in banner:
-            return 'OSVBD 4986'
+            return 'OSVBD 4986', ["ftp", "windows", "metasploit"]
         elif 'Easy File Sharing FTP Server' in banner:
-            return 'OSVDB 27646'
+            return 'OSVDB 27646', ["ftp", "windows", "metasploit"]
         elif 'BigFoolCat' in banner:
-            return 'OSVDB 62134'
+            return 'OSVDB 62134', ["ftp", "windows", "metasploit"]
         elif 'FileCOPA FTP' in banner:
-            return 'OSVDB 27389'
+            return 'OSVDB 27389', ["ftp", "windows", "metasploit"]
         elif 'FreeFloat' in banner:
-            return 'OSVDB 69621'
+            return 'OSVDB 69621', ["ftp", "windows", "metasploit"]
         elif 'freeFTPd 1.0' in banner:
-            return 'OSVDB 96517'
+            return 'OSVDB 96517', ["ftp", "windows", "metasploit"]
         elif 'GlobalSCAPE Secure FTP' in banner:
-            return 'OSVDB 16049'
+            return 'OSVDB 16049', ["ftp", "windows", "metasploit"]
         elif 'Golden FTP Server ready v4' in banner:
-            return 'OSVDB 35951'
+            return 'OSVDB 35951', ["ftp", "windows", "metasploit"]
         elif 'httpdx' in banner:
-            return 'OSVDB 60181'
+            return 'OSVDB 60181', ["ftp", "windows", "metasploit"]
         elif 'Microsoft IIS ftp' in banner:
-            return 'OSVDB 57589'
+            return 'OSVDB 57589', ["ftp", "windows", "metasploit"]
         elif 'NetTerm FTP server' in banner:
-            return 'OSVDB 15865'
+            return 'OSVDB 15865', ["ftp", "windows", "metasploit"]
         elif 'odin FTP server' in banner:
-            return 'OSVDB 68824'
+            return 'OSVDB 68824', ["ftp", "windows", "metasploit"]
         elif '**        Welcome on       **' in banner:
-            return 'OSVDB 65687'
+            return 'OSVDB 65687', ["ftp", "windows", "metasploit"]
         elif "PCMan's FTP Server 2.0" in banner:
-            return 'OSVDB 94624'
+            return 'OSVDB 94624', ["ftp", "windows", "metasploit"]
         elif 'quickshare ftpd' in banner:
-            return 'OSVDB 70776'
+            return 'OSVDB 70776', ["ftp", "windows", "metasploit"]
         elif 'DSC ftpd 1.0 FTP Server' in banner:
-            return 'OSVDB 79691'
+            return 'OSVDB 79691', ["ftp", "windows", "metasploit"]
         elif 'Serv-U FTP Server v4' in banner:
-            return 'OSVDB 3713'
+            return 'OSVDB 3713', ["ftp", "windows", "metasploit"]
         elif 'SlimFTPd' in banner:
-            return 'OSVDB 18172'
+            return 'OSVDB 18172', ["ftp", "windows", "metasploit"]
         elif 'TurboFTP Server 1.30' in banner:
-            return 'OSVDB 85887'
+            return 'OSVDB 85887', ["ftp", "windows", "metasploit"]
         elif 'vftpd' in banner:
-            return 'OSVDB 62163'
+            return 'OSVDB 62163', ["ftp", "windows", "metasploit"]
         elif 'XLINK FTP Server' in banner:
-            return 'OSVDB 58646'
+            return 'OSVDB 58646', ["ftp", "windows", "metasploit"]
         elif 'nas4free FTP Server' in banner:
-            return 'CVE 2013-3631'
+            return 'CVE 2013-3631', ["ftp", "metasploit"]
         elif 'SurgeFTP' in banner:
-            return 'OSVDB 89105'
+            return 'OSVDB 89105', ["ftp", "metasploit"]
         elif 'OpenMediaVault' in banner:
-            return 'CVE 2013-3632'
+            return 'CVE 2013-3632', ["ftp", "metasploit"]
         else:
-            return ""
+            return "", []
 
 class Ssh(Parent):
     default_port = 22
@@ -158,19 +160,19 @@ class Ssh(Parent):
 
     def check_banner(self, banner):
         if 'Tectia Server' in banner:
-            return 'OSVDB 88103'
+            return 'OSVDB 88103', ["ssh", "linux", "metasploit"]
         elif 'ArrayOS' in banner:
-            return 'OSVDB 104654'
+            return 'OSVDB 104654', ["ssh", "linux", "metasploit"]
         elif 'SysaxSSH' in banner:
-            return 'OSVBD 79689'
+            return 'OSVBD 79689', ["ssh", "windows", "metasploit"]
         elif 'WeOnlyDo-wodFTPD 2.1.8.98' in banner:
-            return 'OSVBD 25569'
+            return 'OSVBD 25569', ["ssh", "windows", "metasploit"]
         elif 'WeOnlyDo-wodFTPD 2.0.6' in banner:
-            return 'OSVDB 88006'
+            return 'OSVDB 88006', ["ssh", "windows", "metasploit"]
         elif 'WeOnlyDo-wodFTPD 2.1.3' in banner:
-            return 'OSVDB 88006'
+            return 'OSVDB 88006', ["ssh", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Telnet(Parent):
     default_port = 23
@@ -185,17 +187,17 @@ class Telnet(Parent):
 
     def check_banner(self, banner):
         if 'FreeBSD/' in banner:
-            return 'OSVDB 78020'
+            return 'OSVDB 78020', ["telnet", "linux", "metasploit"]
         elif 'Welcome to Solaris' in banner:
-            return 'OSVDB 31881'
+            return 'OSVDB 31881', ["telnet", "solaris", "metasploit"]
         elif 'SunOs ' in banner:
-            return 'OSVDB 690'
+            return 'OSVDB 690', ["telnet", "solaris", "metasploit"]
         elif 'TelSrv 1.5' in banner:
-            return 'OSVDB 373'
+            return 'OSVDB 373', ["telnet", "windows", "metasploit"]
         elif 'Welcome to GoodTech' in banner:
-            return 'OSVDB 14806'
+            return 'OSVDB 14806', ["telnet", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Smtp(Parent):
     default_port = 25
@@ -210,43 +212,43 @@ class Smtp(Parent):
 
     def check_banner(self, banner):
         if 'Exim' in banner:
-            return 'OSVDB 69685'
+            return 'OSVDB 69685', ["smtp", "linux", "metasploit"]
         elif 'ESMTP TABS Mail Server for Windows NT' in banner:
-            return 'OSVDB 11174'
+            return 'OSVDB 11174', ["smtp", "windows", "metasploit"]
         elif 'Windows E-mail Server From NJStar Software' in banner:
-            return 'OSVDB 76728'
+            return 'OSVDB 76728', ["smtp", "windows", "metasploit"]
         elif 'YahooPOPs! Simple Mail Transfer Service Ready' in banner:
-            return 'OSVDB 10367'
+            return 'OSVDB 10367', ["smtp", "windows", "metasploit"]
         elif 'Microsoft Exchange' in banner:
-            return 'OSVDB 2674'
+            return 'OSVDB 2674', ["smtp", "windows", "metasploit"]
         elif 'Dovecot' in banner:
-            return 'OSVDB 93004'
+            return 'OSVDB 93004', ["smtp", "linux", "metasploit"]
         elif 'OK POP3 server' in banner:
-            return 'OSVDB 11975'
+            return 'OSVDB 11975', ["smtp", "windows", "metasploit"]
         elif 'Cyrus' in banner:
-            return 'OSVDB 25853'
+            return 'OSVDB 25853', ["smtp", "linux", "metasploit"]
         elif 'IMAP4rev1 v12.264' in banner:
-            return 'OSVDB 12037'
+            return 'OSVDB 12037', ["smtp", "linux", "metasploit"]
         elif 'WorldMail' in banner:
-            return 'OSVDB 22097'
+            return 'OSVDB 22097', ["smtp", "windows", "metasploit"]
         elif 'MailEnable' in banner and '2.34' in banner:
-            return 'OSVDB 32125'
+            return 'OSVDB 32125', ["smtp", "windows", "metasploit"]
         elif 'MailEnable' in banner and '2.35' in banner:
-            return 'OSVDB 32124'
+            return 'OSVDB 32124', ["smtp", "windows", "metasploit"]
         elif 'MailEnable' in banner and '1.54' in banner:
-            return 'OSVDB 17844'
+            return 'OSVDB 17844', ["smtp", "windows", "metasploit"]
         elif 'MDaemon 8.0.3' in banner:
-            return 'OSVDB 11838'
+            return 'OSVDB 11838', ["smtp", "windows", "metasploit"]
         elif 'MDaemon 9.6.4' in banner:
-            return 'OSVDB 43111'
+            return 'OSVDB 43111', ["smtp", "windows", "metasploit"]
         elif 'MERCUR' in banner and 'v5.00' in banner:
-            return 'OSVDB 23950'
+            return 'OSVDB 23950', ["smtp", "windows", "metasploit"]
         elif 'Mercury/32' in banner:
-            return 'OSVDB 33883'
+            return 'OSVDB 33883', ["smtp", "windows", "metasploit"]
         elif 'NetMail' in banner:
-            return 'OSVDB 31362'
+            return 'OSVDB 31362', ["smtp", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Http(Parent):
     default_port = 80
@@ -261,232 +263,236 @@ class Http(Parent):
 
     def check_banner(self, banner):
         if 'Symantec Messaging Gateway' in banner:
-            return 'OSVDB 85028'
+            return 'OSVDB 85028', ["http", "linux", "metasploit"]
         elif 'AjaXplorer=' in banner:
-            return 'OSVDB 63552'
+            return 'OSVDB 63552', ["http", "metasploit"]
         elif 'CUPS/' in banner:
-            return 'CVE 2014-6271'
+            return 'CVE 2014-6271', ["http", "metasploit"]
         elif 'X-Powered-By: Coldfusion' in banner:
-            return 'CVE 2013-0632'
+            return 'CVE 2013-0632', ["http", "metasploit"]
         elif 'drupal' in banner.lower():
-            return 'CVE 2014-3704'
+            return 'CVE 2014-3704', ["http", "metasploit"]
         elif 'eXtplorer=' in banner:
-            return 'OSVDB 88751'
+            return 'OSVDB 88751', ["http", "metasploit"]
         elif 'realm="GestioIP"' in banner:
-            return 'OSVDB 98245'
+            return 'OSVDB 98245', ["http", "metasploit"]
         elif 'GlassFish' in banner:
-            return 'OSVDB 71948'
+            return 'OSVDB 71948', ["http", "metasploit"]
         elif 'Horde=' in banner:
-            return 'OSVDB 79246'
+            return 'OSVDB 79246', ["http", "metasploit"]
         elif 'SiteScope/' in banner:
-            return 'OSVDB 99230'
+            return 'OSVDB 99230', ["http", "metasploit"]
         elif 'ispconfig/lighttpd' in banner:
-            return 'CVE 2013-3629'
+            return 'CVE 2013-3629', ["http", "metasploit"]
         elif 'JBoss' in banner:
-            return 'OSVDB 64171'
+            return 'OSVDB 64171', ["http", "metasploit"]
         elif 'X-Jenkins' in banner:
-            return 'EDB 24272'
+            return 'EDB 24272', ["http", "metasploit"]
         elif 'MobileCartly' in banner:
-            return 'OSVDB 85509'
+            return 'OSVDB 85509', ["http", "metasploit"]
         elif 'MoodleSession=' in banner:
-            return 'CVE 2013-3630'
+            return 'CVE 2013-3630', ["http", "metasploit"]
         elif 'Mutiny : Login @ mutiny' in banner:
-            return 'OSVDB 86570'
+            return 'OSVDB 86570', ["http", "metasploit"]
         elif 'realm="op5"' in banner:
-            return 'OSVDB 78065'
+            return 'OSVDB 78065', ["http", "metasploit"]
         elif 'Pandora' in banner and 'v3.1 Build PC10060' in banner:
-            return 'OSVDB 69549'
+            return 'OSVDB 69549', ["http", "metasploit"]
         elif 'phpLDAPadmin 1.2' in banner:
-            return 'OSVDB 76594'
+            return 'OSVDB 76594', ["http", "metasploit"]
         elif 'phpMyAdmin=' in banner:
-            return 'OSVDB 85739'
+            return 'OSVDB 85739', ["http", "metasploit"]
         elif 'PHPTAX by William L' in banner:
-            return 'OSVDB 86992'
+            return 'OSVDB 86992', ["http", "metasploit"]
         elif 'qdpm=' in banner:
-            return 'OSVDB 82978'
+            return 'OSVDB 82978', ["http", "metasploit"]
         elif 'www.thebonnotgang.com' in banner:
-            return 'OSVDB 83767'
+            return 'OSVDB 83767', ["http", "metasploit"]
         elif 'SiT! Support Incident Tracker' in banner:
-            return 'OSVDB 76999'
+            return 'OSVDB 76999', ["http", "metasploit"]
         elif 'Splunk Inc. Splunk' in banner:
-            return 'OSVDB 77695'
+            return 'OSVDB 77695', ["http", "metasploit"]
         elif 'Sun Java System' in banner:
-            return 'OSVDB 61851'
+            return 'OSVDB 61851', ["http", "metasploit"]
         elif 'TestLink 1.9.3' in banner:
-            return  'OSVDB 85446'
+            return  'OSVDB 85446', ["http", "metasploit"]
         elif 'WebPagetest - Website Performance' in banner:
-            return 'OSVDB 83822'
+            return 'OSVDB 83822', ["http", "metasploit"]
         elif 'Powered by WikkaWiki' in banner:
-            return 'OSVDB 77393'
+            return 'OSVDB 77393', ["http", "metasploit"]
         elif 'This program makes use of the Zend' in banner:
-            return 'OSVDB 25149'
+            return 'OSVDB 25149', ["http", "metasploit"]
         elif 'Zavvix 2.0' in banner:
-            return 'CVE 2013-3628'
+            return 'CVE 2013-3628', ["http", "metasploit"]
         elif 'Novell ZENworks Control Center' in banner:
-            return 'OSVDB 91627'
+            return 'OSVDB 91627', ["http", "metasploit"]
         elif 'realm="EvoCam"' in banner:
-            return 'OSVDB 65043'
+            return 'OSVDB 65043', ["http", "osx", "metasploit"]
         elif 'realm="Skyrouter"' in banner:
-            return 'OSVDB 77497'
+            return 'OSVDB 77497', ["http", "linux", "metasploit"]
         elif 'FreePBX' in banner:
-            return 'OSVDB 80544'
+            return 'OSVDB 80544', ["http", "linux", "metasploit"]
         elif 'SecurityGateway' in banner:
-            return 'OSVDB 45854'
+            return 'OSVDB 45854', ["http", "windows", "metasploit"]
         elif "request that this server didn't understand" in banner:
-            return 'OSVDB 66814'
+            return 'OSVDB 66814', ["http", "windows", "metasploit"]
         elif 'Oracle HTTP Server Powered by' in banner:
-            return 'OSVDB 838'
+            return 'OSVDB 838', ["http", "windows", "metasploit"]
         elif 'BadBlue 2.5' in banner:
-            return 'OSVDB 14238'
+            return 'OSVDB 14238', ["http", "windows", "metasploit"]
         elif 'BEA WebLogic' in banner:
-            return 'OSVDB 47096'
+            return 'OSVDB 47096', ["http", "windows", "metasploit"]
         elif 'ManageEngine Desktop Central' in banner:
-            return 'OSVDB 100008'
+            return 'OSVDB 100008', ["http", "windows", "metasploit"]
         elif 'Easy-Web Server' in banner:
-            return 'OSVDB 66614'
+            return 'OSVDB 66614', ["http", "windows", "metasploit"]
         elif 'Ericom AccessNow Server' in banner:
-            return 'CVE 2014-3913'
+            return 'CVE 2014-3913', ["http", "windows", "metasploit"]
         elif 'HP Managed Printing Administration' in banner:
-            return 'OSVBD 78-15'
+            return 'OSVBD 78015', ["http", "windows", "metasploit"]
         elif 'httpdx' in banner and 'Win32' in banner:
-            return 'OSVDB 58714'
+            return 'OSVDB 58714', ["http", "windows", "metasploit"]
         elif 'Icecast ' in banner:
-            return 'OSVDB 10406'
+            return 'OSVDB 10406', ["http", "windows", "metasploit"]
         elif 'intrasrv 1.0' in banner:
-            return 'OSVDB 94097'
+            return 'OSVDB 94097', ["http", "windows", "metasploit"]
         elif 'Ipswitch-IMail/8.03' in banner:
-            return 'OSVDB 9177'
+            return 'OSVDB 9177', ["http", "windows", "metasploit"]
         elif 'content="JIRA"' in banner:
-            return 'OSVDB 103807'
+            return 'OSVDB 103807', ["http", "windows", "metasploit"]
         elif 'Kaseya-Tetra' in banner:
-            return 'OSVDB 99984'
+            return 'OSVDB 99984', ["http", "windows", "metasploit"]
         elif 'Kolibri-2.0' in banner:
-            return 'OSVDB 70808'
+            return 'OSVDB 70808', ["http", "windows", "metasploit"]
         elif 'LANDesk Management Agent' in banner:
-            return 'OSVDB 79276'
+            return 'OSVDB 79276', ["http", "windows", "metasploit"]
         elif 'MarkVision Enterprise' in banner:
-            return 'CVE 2014-8741'
+            return 'CVE 2014-8741', ["http", "windows", "metasploit"]
         elif 'MailEnable' in banner:
-            return 'OSVDB 15913'
+            return 'OSVDB 15913', ["http", "windows", "metasploit"]
         elif 'Spipe 1.0' in banner:
-            return 'OSVDB 29421'
+            return 'OSVDB 29421', ["http", "windows", "metasploit"]
         elif 'WDaemon 6.8' in banner:
-            return 'OSVDB 3255'
+            return 'OSVDB 3255', ["http", "windows", "metasploit"]
         elif 'MiniWeb' in banner:
-            return 'OSVDB 92198'
+            return 'OSVDB 92198', ["http", "windows", "metasploit"]
         elif '2.01 11th September' in banner:
-            return 'OSVDB 29257'
+            return 'OSVDB 29257', ["http", "windows", "metasploit"]
         elif 'NetDecision-HTTP-Server 1.0' in banner:
-            return 'OSVDB 79651'
+            return 'OSVDB 79651', ["http", "windows", "metasploit"]
         elif 'peercast=' in banner:
-            return 'OSVDB 23777'
+            return 'OSVDB 23777', ["http", "windows", "linux", "metasploit"]
         elif 'PrivateWire GateWay' in banner:
-            return 'OSVDB 26861'
+            return 'OSVDB 26861', ["http", "windows", "metasploit"]
         elif 'PSO Proxy 0.9' in banner:
-            return 'OSVDB 4028'
+            return 'OSVDB 4028', ["http", "windows", "metasploit"]
         elif 'R4 Embedded Server' in banner:
-            return 'OSVDB 79007'
+            return 'OSVDB 79007', ["http", "windows", "metasploit"]
         elif 'server: hfs' in banner.lower():
-            return 'OSVDB 111386'
+            return 'OSVDB 111386', ["http", "windows", "metasploit"]
         elif 'server: sambar' in banner.lower():
-            return 'OSVDB 5786'
+            return 'OSVDB 5786', ["http", "windows", "metasploit"]
         elif 'Savant 3.1' in banner:
-            return 'OSVDB 9829'
+            return 'OSVDB 9829', ["http", "windows", "metasploit"]
         elif 'Serv-U' in banner:
-            return 'OSVDB 59772'
+            return 'OSVDB 59772', ["http", "windows", "metasploit"]
         elif 'Network Audio Server' in banner:
-            return '12585'
+            return '12585', ["http", "windows", "metasploit"]
         elif 'SHTTPD' in banner:
-            return 'OSVDB 29565'
+            return 'OSVDB 29565', ["http", "windows", "metasploit"]
         elif 'SolarWinds - Storage Manager' in banner:
-            return 'OSVDB 81634'
+            return 'OSVDB 81634', ["http", "windows", "metasploit"]
         elif 'Scrutinizer 9.' in banner:
-            return 'OSVDB 84232'
+            return 'OSVDB 84232', ["http", "windows", "metasploit"]
         elif 'Steamcast 0.9.75' in banner:
-            return 'OSVDB 42670'
+            return 'OSVDB 42670', ["http", "windows", "metasploit"]
         elif 'PMSoftware-SWS 2.' in banner:
-            return 'OSVDB 84310'
+            return 'OSVDB 84310', ["http", "windows", "metasploit"]
         elif 'EAServer' in banner:
-            return 'OSVDB 17996'
+            return 'OSVDB 17996', ["http", "windows", "metasploit"]
         elif 'Center Chargeback Manager' in banner:
-            return 'OSVDB 94188'
+            return 'OSVDB 94188', ["http", "windows", "metasploit"]
         elif 'Xitami' in banner:
-            return 'OSVDB 40594'
+            return 'OSVDB 40594', ["http", "windows", "metasploit"]
         elif 'Alcatel Cloud DVR Streamer' in banner:
-            return 'OSVDB 40521'
+            return 'OSVDB 40521', ["http", "linux", "metasploit"]
         elif 'direct entry from outside' in banner:
-            return 'OSVDB 88860'
+            return 'OSVDB 88860', ["http", "linux", "metasploit"]
         elif 'Basic realm="DD-WRT"' in banner:
-            return 'OSVDB 55990'
+            return 'OSVDB 55990', ["http", "linux", "metasploit"]
         elif 'DIR-645' in banner:
-            return 'OSVDB 95951'
+            return 'OSVDB 95951', ["http", "linux", "metasploit"]
         elif 'DIR-600' in banner or 'DIR-300' in banner:
-            return 'OSVDB 89861'
+            return 'OSVDB 89861', ["http", "linux", "metasploit"]
         elif 'DIR-815' in banner:
-            return 'OSVDB 92144'
+            return 'OSVDB 92144', ["http", "linux", "metasploit"]
         elif 'DIR-605' in banner:
-            return 'OSVDB 86824'
+            return 'OSVDB 86824', ["http", "linux", "metasploit"]
         elif 'DIR-615' in banner:
-            return 'OSVDB 90174'
+            return 'OSVDB 90174', ["http", "linux", "metasploit"]
         elif 'Dolibarr 3.1.1' in banner:
-            return 'OSVDB 80980'
+            return 'OSVDB 80980', ["http", "linux", "metasploit"]
         elif 'GroundWork' in banner:
-            return 'OSVDB 91051'
+            return 'OSVDB 91051', ["http", "linux", "metasploit"]
         elif 'HP System Management Homepage v' in banner:
-            return 'OSVDB 91912'
+            return 'OSVDB 91812', ["http", "linux", "metasploit"]
         elif 'realm="WRT54G"' in banner or 'realm="WRT54GS"' in banner:
-            return 'OSVDB 19389'
+            return 'OSVDB 19389', ["http", "linux", "metasploit"]
         elif 'realm="E1500"' in banner:
-            return 'OSVDB 89912'
+            return 'OSVDB 89912', ["http", "linux", "metasploit"]
         elif 'realm="Linksys E2500"' in banner:
-            return 'OSVDB 89912'
+            return 'OSVDB 89912', ["http", "linux", "metasploit"]
         elif 'realm="Linksys E4200"' in banner:
-            return 'OSVDB 103321'
+            return 'OSVDB 103321', ["http", "linux", "metasploit"]
         elif 'realm="Linksys E2100L"' in banner:
-            return 'OSVDB 103321'
+            return 'OSVDB 103321', ["http", "linux", "metasploit"]
         elif 'realm="Linksys E2000"' in banner:
-            return 'OSVDB 103321'
+            return 'OSVDB 103321', ["http", "linux", "metasploit"]
         elif 'realm="Linksys E1550"' in banner:
-            return 'OSVDB 103321'
+            return 'OSVDB 103321', ["http", "linux", "metasploit"]
         elif 'realm="E1200"' in banner:
-            return 'OSVDB 103321'
+            return 'OSVDB 103321', ["http", "linux", "metasploit"]
         elif 'realm="E1000"' in banner:
-            return 'OSVDB 103321'
+            return 'OSVDB 103321', ["http", "linux", "metasploit"]
         elif 'realm="E900"' in banner:
-            return 'OSVDB 103321'
+            return 'OSVDB 103321', ["http", "linux", "metasploit"]
         elif 'realm="WRT110"' in banner:
-            return 'CVE 2013-3568'
+            return 'CVE 2013-3568', ["http", "linux", "metasploit"]
         elif 'realm="WRT160Nv2"' in banner:
-            return 'OSVDB 90093'
+            return 'OSVDB 90093', ["http", "linux", "metasploit"]
         elif 'realm="WRT54GL"' in banner:
-            return 'OSVDB 89912'
+            return 'OSVDB 89912', ["http", "linux", "metasploit"]
         elif 'JSESSIONID=' in banner:
-            return 'OSVDB 93444'
+            return 'OSVDB 93444', ["http", "linux", "metasploit"]
         elif 'realm="NETGEAR DGN1000B"' in banner:
-            return 'OSVDB 89985'
+            return 'OSVDB 89985', ["http", "linux", "metasploit"]
         elif 'realm="NETGEAR DGN2200B"' in banner:
-            return 'OSVDB 90320'
+            return 'OSVDB 90320', ["http", "linux", "metasploit"]
         elif 'nginx/1.3.9' in banner or 'nginx/1.4.0' in banner:
-            return 'OSVDB 93037'
+            return 'OSVDB 93037', ["http", "linux", "metasploit"]
         elif 'Openfiler Storage' in banner:
-            return 'OSVDB 93881'
+            return 'OSVDB 93881', ["http", "linux", "metasploit"]
         elif 'Symantec Web Gateway' in banner:
-            return 'OSVDB 82925'
+            return 'OSVDB 82925', ["http", "linux", "metasploit"]
         elif 'V-CMS v1' in banner:
-            return 'OSVDB 77183'
+            return 'OSVDB 77183', ["http", "linux", "metasploit"]
         elif 'WebCalendar v1.2' in banner:
-            return 'OSVDB 81329'
+            return 'OSVDB 81329', ["http", "linux", "metasploit"]
         elif 'Openfire, ' in banner:
-            return 'OSVDB 49663'
+            return 'OSVDB 49663', ["http", "metasploit"]
+        elif '(x86)/Ampps/www/Samples/phpFileManager-0.9.8/</a>' in banner:
+            return 'EDB 37709', ["http", "metasploit"]
+        elif 'Server: Easy File Sharing Web Server v7.2'
+            return 'EDB 38829', ["http", "windows"]
         else:
-            return ''
+            return '', []
 
 class Mcafee(Http):
     default_port = 81
 
     def check_banner(self, banner):
         if 'Spipe 1.0' in banner:
-            return 'OSVDB 29421'
+            return 'OSVDB 29421', ["mcafee", "windows", "metasploit"]
 
 class Remote_Telnet(Parent):
     default_port = 107
@@ -501,17 +507,17 @@ class Remote_Telnet(Parent):
 
     def check_banner(self, banner):
         if 'FreeBSD/' in banner:
-            return 'OSVDB 78020'
+            return 'OSVDB 78020', ["telnet", "linux", "metasploit"]
         elif 'Welcome to Solaris' in banner:
-            return 'OSVDB 31881'
+            return 'OSVDB 31881', ["telnet", "solaris", "metasploit"]
         elif 'SunOs ' in banner:
-            return 'OSVDB 690'
+            return 'OSVDB 690', ["telnet", "solaris", "metasploit"]
         elif 'TelSrv 1.5' in banner:
-            return 'OSVDB 373'
+            return 'OSVDB 373', ["telnet", "windows", "metasploit"]
         elif 'Welcome to GoodTech' in banner:
-            return 'OSVDB 14806'
+            return 'OSVDB 14806', ["telnet", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Pop3(Smtp):
     default_port = 110
@@ -559,9 +565,9 @@ class Cups(Http):
 
     def check_banner(self, banner):
         if 'CUPS/' in banner:
-            return 'CVE 2014-6271'
+            return 'CVE 2014-6271', ["cups", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Rsync(Parent):
 #    default_port = 873
@@ -642,27 +648,27 @@ class GoodTech(Parent):
 
     def check_banner(self, banner):
         if 'Welcome to GoodTech' in banner:
-            return 'OSVDB 14806'
+            return 'OSVDB 14806', ["telnet", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Hp_Management(Http):
     default_port = 2381
 
     def check_banner(self, banner):
         if 'HP System Management Homepage v' in banner:
-            return 'OSVDB 91912'
+            return 'OSVDB 91812', ["http", "linux", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Mdaemon(Http):
     default_port = 3000
 
     def check_banner(self, banner):
         if 'WDaemon 6.8' in banner:
-            return 'OSVDB 3255'
+            return 'OSVDB 3255', ["smtp", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Novell(Parent):
 #    default_port = 3037
@@ -696,9 +702,9 @@ class AltN(Http):
 
     def check_banner(self, banner):
         if 'SecurityGateway' in banner:
-            return 'OSVDB 45854'
+            return 'OSVDB 45854', ["smtp", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Sockso(Parent):
 #    default_port = 4444
@@ -711,18 +717,18 @@ class Eaton_Network(Http):
 
     def check_banner(self, banner):
         if 'This program makes use of the Zend' in banner:
-            return 'OSVDB 25149'
+            return 'OSVDB 25149', ["application", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class GlassFish(Http):
     default_port = 4848
 
     def check_banner(self, banner):
         if 'GlassFish' in banner:
-            return 'OSVDB 71948'
+            return 'OSVDB 71948', ["application", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Windows_Deployment(Parent):
 #    default_port = 5040
@@ -780,9 +786,9 @@ class vsftp(Parent):
 
     def check_banner(self, banner):
         if "(vsFTPd 2.3.4)" in banner:
-            return "OSVDB 73573"
+            return "OSVDB 73573", ["ftp", "linux", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Redis(Parent):
 #    default_port = 6379
@@ -798,18 +804,18 @@ class Netwin(Http):
 
     def check_banner(self, banner):
         if 'SurgeFTP' in banner:
-            return 'OSVDB 89105'
+            return 'OSVDB 89105', ["ftp", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Peercast(Http):
     default_port = 7144
 
     def check_banner(self, banner):
         if 'peercast=' in banner:
-            return 'OSVDB 23777'
+            return 'OSVDB 23777', ["application", "windows", "linux", "metasploit"]
         else:
-            return ''
+            return '', []
 
 
 #class Energizer(Parent):
@@ -826,9 +832,9 @@ class ManageEngine_Central(Http):
 
     def check_banner(self, banner):
         if 'ManageEngine Desktop Central' in banner:
-            return 'OSVDB 100008'
+            return 'OSVDB 100008', ["application", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 class Http_Alternative(Http):
     default_port = 8080
@@ -853,9 +859,9 @@ class ManageEngine(Http):
 
     def check_banner(self, banner):
         if 'ManageEngine Desktop Central' in banner:
-            return 'OSVDB 100008'
+            return 'OSVDB 100008', ["application", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Nessus(Parent):
 #    default_port = 8834
@@ -874,9 +880,9 @@ class OpenFire(Http):
 
     def check_banner(self, banner):
         if 'Openfire, ' in banner:
-            return 'OSVDB 49663'
+            return 'OSVDB 49663', ["application", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Indices(Parent):
 #    default_port = 9200
@@ -892,9 +898,9 @@ class Lexmark(Http):
 
     def check_banner(self, banner):
         if 'MarkVision Enterprise' in banner:
-            return 'CVE 2014-8741'
+            return 'CVE 2014-8741', ["application", "windows", "metasploit"]
         else:
-            return ''
+            return '', []
 
 #class Lantronix(Http):
 #    default_port = 9999

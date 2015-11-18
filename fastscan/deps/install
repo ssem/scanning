@@ -2,11 +2,11 @@
 
 home=`pwd`
 
-### make ###
-sudo apt-get -y install make
-
 ### unzip ###
 sudo apt-get -y install unzip
+
+### make ###
+sudo apt-get -y install make
 
 ### python ###
 sudo apt-get -y install python
@@ -16,9 +16,6 @@ sudo apt-get -y install python-requests
 
 ### libpcap ###
 sudo apt-get -y install libpcap0.8-dev
-
-### tmux ###
-sudo apt-get -y install tmux
 
 ### masscan ###
 unzip masscan-master.zip

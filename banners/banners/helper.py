@@ -15,10 +15,12 @@ class Helper_Class:
                 banner_modules[int(cm.default_port)] = cm
         return banner_modules
 
-    def scan_all_ports(self, ip):
+    def scan_all_ports(self, ip, timeout=.5):
         for module in self.modules:
-            yield self.modules[module].run(ip, self.modules[module].default_port)
+            result = self.modules[module].run(ip, self.modules[module].default_port, timeout)
+            if result != None:
+                yield result
 
-    def scan(self, ip, port):
+    def scan_port(self, ip, port, timeout=.5):
         module = self.modules[int(port)]
-        return module.run(ip, port)
+        return module.run(ip, port, timeout)
