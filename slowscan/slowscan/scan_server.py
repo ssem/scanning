@@ -92,8 +92,7 @@ class Scan_Server:
                     attempts += 1
                     queue.put(1)
                     if attempts % rate == 0:
-                        try:time.sleep(2 - (time.time() - start))
-                        except:pass
+                        time.sleep(2 - (time.time() - start))
                         start = time.time()
                 except:pass
 

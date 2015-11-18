@@ -11,23 +11,21 @@ import requests
 
 class Parent():
     def __init__(self):
-        self.blacklist_ips = []
+        pass
 
     def run(self, ip, port, timeout=0.5):
-        if ip not in self.blacklist_ips:
-            try:banner = self.get_banner(ip, port, timeout)
-            except KeyboardInterrupt:raise KeyboardInterrupt
-            except:banner = ""
-            if banner == "":
-                exploit, category = "",""
-            else:
-                exploit, category = self.check_banner(banner)
-            return {"ip": ip,
-                    "port": port,
-                    "banner": banner.rstrip('\r\n'),
-                    "exploit": exploit,
-                    "category": category,
-                    "time": time.time()}
+        try:banner = self.get_banner(ip, port, timeout)
+        except KeyboardInterrupt:raise KeyboardInterrupt
+        except:return None
+        if banner == "":
+            return None
+        exploit, category = self.check_banner(banner)
+        return {"ip": ip,
+                "port": port,
+                "banner": banner.rstrip('\r\n'),
+                "exploit": exploit,
+                "category": category,
+                "time": time.time()}
 
     def get_banner(self, ip, port, timeout=10):
         raise Exception('Not Implemented')
@@ -482,7 +480,7 @@ class Http(Parent):
             return 'OSVDB 49663', ["http", "metasploit"]
         elif '(x86)/Ampps/www/Samples/phpFileManager-0.9.8/</a>' in banner:
             return 'EDB 37709', ["http", "metasploit"]
-        elif 'Server: Easy File Sharing Web Server v7.2'
+        elif 'Server: Easy File Sharing Web Server v7.2' in banner:
             return 'EDB 38829', ["http", "windows"]
         else:
             return '', []

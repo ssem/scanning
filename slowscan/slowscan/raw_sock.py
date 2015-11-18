@@ -49,9 +49,9 @@ class Send:
     def send_syn_packet(self, source_ip, dest_ip, source_port, dest_port):
         ip_header = self._create_ip_header(source_ip, dest_ip)
         tcp_header = self._create_tcp_header(source_ip, dest_ip, source_port, dest_port)
-        try:self.s.sendto(ip_header + tcp_header, (dest_ip, 0))
-        except:pass
-        try:self.s.shutdown(socket.SHUT_RD)
+        try:
+            self.s.sendto(ip_header + tcp_header, (dest_ip, 0))
+            self.s.shutdown(socket.SHUT_RD)
         except:pass
 
 

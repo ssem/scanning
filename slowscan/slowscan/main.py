@@ -33,7 +33,7 @@ class Main:
                 self._print_status(rate)
                 time.sleep(1)
             sys.stdout.write("\n")
-            for x in reversed(xrange(1,5)):
+            for x in reversed(xrange(1,10)):
                 sys.stdout.write("\b" * 100)
                 sys.stdout.write("waiting %s..." % x)
                 sys.stdout.flush()
@@ -41,4 +41,4 @@ class Main:
             self._print_status(rate)
             sys.stdout.write("\n")
             os.chmod(outfile, 0666)
-        except KeyboardInterrupt:exit()
+        except KeyboardInterrupt:exit("bye")

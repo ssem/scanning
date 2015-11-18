@@ -3,7 +3,7 @@ import inspect
 import argparse
 import threading
 import multiprocessing
-from banners import banners
+from banners.helper import Helper_Class
 from slowscan.raw_sock import Receive
 from slowscan.country_lookup import Country_Lookup
 
@@ -25,17 +25,11 @@ class Listen_Server:
         output = open(output, "a")
         country_lookup = Country_Lookup()
         country_lookup.add_range_dir(range_dir)
-        banner_modules = {}
-        classmembers = inspect.getmembers(banners, inspect.isclass)
-        for classmember in classmembers:
-            if classmember[0] != "Parent" and classmember[0] != "Process":
-                cm = classmember[1]()
-                banner_modules[int(cm.default_port)] = cm
+        hp = Helper_Class()
         queue.put("ready")
         for ip, port in self._receive.yield_synack():
             try:
-                banner_module = banner_modules[int(port)]
-                result = banner_module.run(ip, port)
+                result = hp.scan_port(ip, port)
                 if result:
                     result['country'] = country_lookup.find(ip)
                     output.write("%s\n" % result)

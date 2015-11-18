@@ -7,8 +7,8 @@ if __name__ == "__main__":
     parser.add_argument("ranges_dir", help="directory of ranges")
     parser.add_argument("port_file", help="file of ports numbers")
     parser.add_argument("outfile", help="output file")
-    parser.add_argument("--rate", default=100,
-        help="ips to scan per second (DEFAULT: 100)")
+    parser.add_argument("--rate", default=25,
+        help="ips to scan per second (DEFAULT: 25)")
     args = parser.parse_args()
     main = Main()
     main.run(args.ranges_dir, args.port_file, int(args.rate), args.outfile)
