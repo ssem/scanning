@@ -3,7 +3,7 @@ import inspect
 import argparse
 import threading
 import multiprocessing
-from slowscan import banners
+from banners import banners
 from slowscan.raw_sock import Receive
 from slowscan.country_lookup import Country_Lookup
 

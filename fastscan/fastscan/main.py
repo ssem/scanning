@@ -2,7 +2,7 @@ import os
 import time
 import inspect
 import tempfile
-from fastscan import banners
+from banners import banners
 from fastscan.scan_server import Scan_Server
 from fastscan.country_lookup import Country_Lookup
 

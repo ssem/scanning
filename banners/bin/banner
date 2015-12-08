@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+import inspect
+import argparse
+from banners.helper import Helper_Class
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="fingerprint an ip")
+    parser.add_argument("ip", help="ip address of target")
+    parser.add_argument("--port", help="port address to scan")
+    parser.add_argument("--outfile", help="output file")
+    args = parser.parse_args()
+    hp = Helper_Class()
+    results = []
+    if args.port:
+        results.append(hp.scan(args.ip, args.port))
+    else:
+        for result in hp.scan_all_ports(args.ip):
+            results.append(result)
+    if args.outfile:
+        f = open(args.outfile, "w+")
+        for r in results:
+            if r != None:
+                f.write("%s\n", r)
+        f.close()
+    else:
+        for r in results:
+            if r != None:
+                print r
