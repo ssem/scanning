@@ -6,7 +6,6 @@ import subprocess
 class Scan_Server:
     def __init__(self):
         self._temp_ranges = None
-        self._temp_output = None
         self._process = None
 
     def _get_ranges(self, ranges_dir):
@@ -38,7 +37,6 @@ class Scan_Server:
     def scan(self, ranges_dir, port_file, rate, output):
         self._temp_ranges = self._get_ranges(ranges_dir)
         ports = self._get_ports(port_file)
-        self._temp_output = tempfile.mkstemp()[1]
         self._masscan(ports, self._temp_ranges, rate, output)
 
     def _masscan(self, ports, ranges, rate, output):
@@ -69,6 +67,4 @@ class Scan_Server:
 
     def __del__(self):
         try:os.remove(self._temp_ranges)
-        except:pass
-        try:os.remove(self._temp_output)
         except:pass

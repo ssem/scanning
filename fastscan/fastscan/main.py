@@ -17,22 +17,25 @@ class Main:
     def _finger_print(self):
         f = open(self._temp_output, 'r')
         while True:
-            line = f.readline()
-            status = self.scan_server.poll()
-            if line and not line.startswith("#"):
-                try:
-                    args = line.split(" ")
-                    ip = args[3]
-                    port = args[2]
-                except: continue
-                result = self.banners.scan_port(ip, port)
-                if result != None:
-                    result['country'] = self.country_lookup.find(ip)
-                    yield result
-            else:
-                if status is not None:
-                    break
-                time.sleep(.1)
+            try:
+                line = f.readline()
+                status = self.scan_server.poll()
+                if line and not line.startswith("#"):
+                    try:
+                        args = line.split(" ")
+                        ip = args[3]
+                        port = args[2]
+                    except: continue
+                    result = self.banners.scan_port(ip, port)
+                    if result != None:
+                        result['country'] = self.country_lookup.find(ip)
+                        yield result
+                else:
+                    if status is not None:
+                        break
+                    time.sleep(.1)
+            except KeyboardInterrupt:
+                pass
 
     def run(self, range_dir, port_file, rate, output):
         self.country_lookup.add_range_dir(range_dir)
