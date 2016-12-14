@@ -50,7 +50,7 @@ class Send:
         ip_header = self._create_ip_header(source_ip, dest_ip)
         tcp_header = self._create_tcp_header(source_ip, dest_ip, source_port, dest_port)
         try:
-            self.s.sendto(ip_header + tcp_header, (dest_ip, 0))
+            self.s.sendto(ip_header + tcp_header, (dest_ip, dest_port))
             self.s.shutdown(socket.SHUT_RD)
         except:pass
 
@@ -86,20 +86,22 @@ class Receive:
                 "checksum": header[7],
                 "urg pnt": header[8]}
 
-    def yield_all(self):
+    def yield_all(self, timeout=None):
         while True:
             try:
-                inp, outp, execption = select.select([self.s], [], [])
+                inp, outp, execption = select.select([self.s], [], [], timeout)
                 for sock in inp:
                     packet, source = sock.recvfrom(4096)
                     packet = self._unpack_tcp_header(packet)
                     yield source[0], packet['source port']
             except:pass
 
-    def yield_synack(self):
+    def yield_synack(self, timeout=None):
         while True:
+            inp, outp, execption = select.select([self.s], [], [], timeout)
+            if not (inp or outp or execption):
+                raise TimeoutError
             try:
-                inp, outp, execption = select.select([self.s], [], [])
                 for sock in inp:
                     packet, source = sock.recvfrom(4096)
                     tcp = self._unpack_tcp_header(packet)

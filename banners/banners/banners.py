@@ -14,18 +14,20 @@ class Parent():
         pass
 
     def run(self, ip, port, timeout=0.5):
-        try:banner = self.get_banner(ip, port, timeout)
-        except KeyboardInterrupt:raise KeyboardInterrupt
-        except:return None
-        if banner == "":
-            return None
-        exploit, category = self.check_banner(banner)
-        return {"ip": ip,
-                "port": port,
-                "banner": banner.rstrip('\r\n'),
-                "exploit": exploit,
-                "category": category,
-                "time": time.time()}
+        result = {"ip": ip,
+                  "port": port,
+                  "banner": "",
+                  "exploit": "",
+                  "category": "",
+                  "time"; time.time()}
+        try:
+            result["banner"] = self.get_banner(ip, port, timeout)
+            exploit, category = self.check_banner(banner)
+            result["exploit"] = exploit
+            result["category"] = category
+        except:
+            pass
+        return result
 
     def get_banner(self, ip, port, timeout=10):
         raise Exception('Not Implemented')

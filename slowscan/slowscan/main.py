@@ -25,20 +25,25 @@ class Main:
             self.listen_server.received, attempts, total, percent, estimate))
         sys.stdout.flush()
 
-    def run(self, range_dir, port_file, rate, outfile):
+    def run(self, range_dir, port_file, rate, output):
         try:
-            self.listen_server.listen(range_dir, outfile)
+            self.listen_server.listen(range_dir, output)
             self.scan_server.scan(range_dir, port_file, rate)
             while self.scan_server.is_alive():
-                self._print_status(rate)
-                time.sleep(1)
+                if output != sys.stdout:
+                    self._print_status(rate)
+                    time.sleep(1)
+            while self.listen_server.is_alive():
+                if output != sys.stdout:
+                    self._print_status(rate)
+                    time.sleep(1)
             sys.stdout.write("\n")
-            for x in reversed(xrange(1,10)):
-                sys.stdout.write("\b" * 100)
-                sys.stdout.write("waiting %s..." % x)
-                sys.stdout.flush()
+            for x in reversed(xrange(1,30)):
+                if output != sys.stdout:
+                    sys.stdout.write("\b" * 100)
+                    sys.stdout.write("waiting %s..." % x)
+                    sys.stdout.flush()
                 time.sleep(1)
             self._print_status(rate)
             sys.stdout.write("\n")
-            os.chmod(outfile, 0666)
         except KeyboardInterrupt:exit("bye")

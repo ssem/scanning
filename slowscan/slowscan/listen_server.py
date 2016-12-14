@@ -13,6 +13,7 @@ class Listen_Server:
         self.listen_server = None
         self._receive = Receive()
         self._received_q = multiprocessing.Queue()
+        self._done = multiprocessing.Queue()
         self._received = 0
 
     @property
@@ -21,37 +22,43 @@ class Listen_Server:
             self._received += self._received_q.get()
         return self._received
 
-    def _listen_server(self, range_dir, output, queue):
-        output = open(output, "a")
+    def _listen_server(self, range_dir, output, queue, done):
         country_lookup = Country_Lookup()
         country_lookup.add_range_dir(range_dir)
         hp = Helper_Class()
         queue.put("ready")
-        for ip, port in self._receive.yield_synack():
+        while True:
             try:
-                result = hp.scan_port(ip, port)
-                if result:
-                    result['country'] = country_lookup.find(ip)
-                    output.write("%s\n" % result)
-                    output.flush()
-                    queue.put(1)
-            except:pass
-        output.close()
+                for ip, port in self._receive.yield_synack(10):
+                    result = hp.scan_port(ip, port)
+                    if result:
+                        result['country'] = country_lookup.find(ip)
+                        output.write("%s\n" % result)
+                        output.flush()
+                        queue.put(1)
+            except TimeoutError: # only exit if wait or is_alive is called
+                print "timeout"
+                if not done.empty():
+                    print "done"
+                    output.close()
+                    return
 
     def listen(self, range_dir, output):
         self.listen_server = multiprocessing.Process(
             target=self._listen_server,
-            args=(range_dir, output, self._received_q))
+            args=(range_dir, output, self._received_q, self._done))
         self.listen_server.daemon = True
         self.listen_server.start()
         self._received_q.get()
         print "\033[92m[+]\033[1;m Listening"
 
     def wait(self, timeout=None):
+        self._done.put("done")
         self.listen_server.join()
         self.__del__()
 
     def is_alive(self):
+        self._done.put("done")
         return self.listen_server.is_alive()
 
     def __del__(self):

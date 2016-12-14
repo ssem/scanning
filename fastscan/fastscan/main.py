@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import inspect
 import tempfile
 from banners.helper import Helper_Class
@@ -23,26 +24,25 @@ class Main:
                 if line and not line.startswith("#"):
                     try:
                         args = line.split(" ")
-                        ip = args[3]
-                        port = args[2]
-                    except: continue
-                    result = self.banners.scan_port(ip, port)
-                    if result != None:
+                        result = self.banners.scan_port(args[3], args[2])
                         result['country'] = self.country_lookup.find(ip)
                         yield result
+                    except Exception as e:
+                        print "[ERROR] %s" % e
                 else:
-                    if status is not None:
-                        break
+                    if status is not None:break
                     time.sleep(.1)
-            except KeyboardInterrupt:
-                pass
+            except KeyboardInterrupt:return
+            except Exception as e:
+                print  "[ERROR] %s" % e
 
-    def run(self, range_dir, port_file, rate, output):
+    def run(self, range_dir, port_file, rate, iface, output):
         self.country_lookup.add_range_dir(range_dir)
-        self.scan_server.scan(range_dir, port_file, rate, self._temp_output)
+        self.scan_server.scan(range_dir, port_file, rate, iface, self._temp_output)
         f = open(output, 'w+')
         for result in self._finger_print():
-            f.write("%s\n" % result)
+            try:f.write("%s\n" % json.dump(result))
+            except:pass
             f.flush()
         f.close()
 

@@ -34,17 +34,18 @@ class Scan_Server:
                     sys.stderr.write(str(e))
         return ",".join(ports)
 
-    def scan(self, ranges_dir, port_file, rate, output):
+    def scan(self, ranges_dir, port_file, rate, iface, output):
         self._temp_ranges = self._get_ranges(ranges_dir)
         ports = self._get_ports(port_file)
-        self._masscan(ports, self._temp_ranges, rate, output)
+        self._masscan(ports, self._temp_ranges, rate, iface, output)
 
-    def _masscan(self, ports, ranges, rate, output):
+    def _masscan(self, ports, ranges, rate, iface, output):
         print 'masscan',
         print '--exclude', '255.255.255.255',
         print '-p', ports,
         print '-iL', ranges,
         print '--rate', rate,
+        print '-e', iface,
         print '-oL', output,
         print '--connection-timeout', '100'
         self._process = subprocess.Popen(['masscan',
@@ -52,6 +53,7 @@ class Scan_Server:
             '-p', ports,
             '-iL', ranges,
             '--rate', str(rate),
+            '-e', iface,
             '-oL', output,
             '--connection-timeout', '100'])
 
