@@ -10,7 +10,6 @@ from fastscan.country_lookup import Country_Lookup
 
 class Main:
     def __init__(self):
-        self._temp_output = tempfile.mkstemp()[1]
         self.country_lookup = Country_Lookup()
         self.scan_server = Scan_Server()
         self.banners = Helper_Class()
@@ -25,7 +24,7 @@ class Main:
                     try:
                         args = line.split(" ")
                         result = self.banners.scan_port(args[3], args[2])
-                        result['country'] = self.country_lookup.find(ip)
+                        result['country'] = self.country_lookup.find(args[3])
                         yield result
                     except Exception as e:
                         print "[ERROR] %s" % e
@@ -38,14 +37,11 @@ class Main:
 
     def run(self, range_dir, port_file, rate, iface, output):
         self.country_lookup.add_range_dir(range_dir)
-        self.scan_server.scan(range_dir, port_file, rate, iface, self._temp_output)
+        moutput = "%s_masscan" % output
+        self.scan_server.scan(range_dir, port_file, rate, iface, moutput)
         f = open(output, 'w+')
         for result in self._finger_print():
-            try:f.write("%s\n" % json.dump(result))
-            except:pass
+            try:f.write("%s\n" % json.dumps(result))
+            except Exception as e:print e
             f.flush()
         f.close()
-
-    def __del__(self):
-        try:os.remove(self._temp_output)
-        except:pass

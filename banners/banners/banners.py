@@ -19,7 +19,7 @@ class Parent():
                   "banner": "",
                   "exploit": "",
                   "category": "",
-                  "time"; time.time()}
+                  "time": time.time()}
         try:
             result["banner"] = self.get_banner(ip, port, timeout)
             exploit, category = self.check_banner(banner)

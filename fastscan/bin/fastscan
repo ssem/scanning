@@ -8,7 +8,7 @@ if __name__ == "__main__":
     parser.add_argument("port_file", help="file of port numbers")
     parser.add_argument("output", help="output file")
     parser.add_argument("--rate", default=100, help="ip per sec(DEFAULT: 100)")
-    parser.add_argument("--iface", default="eth0" help="network interface")
+    parser.add_argument("--iface", default="eth0", help="network interface")
     args = parser.parse_args()
     main = Main()
     main.run(args.range_dir, args.port_file, int(args.rate), args.iface, args.output)
