@@ -2,9 +2,9 @@
 #19      # chargen_probe
 #21      # ftp
 #22      # ssh
-#23      # telnet
+23      # telnet
 #25      # smtp
-80      # http
+#80      # http
 #81      # mcafee
 #107     # remote telnet
 #110     # pop3

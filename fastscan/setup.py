@@ -4,5 +4,5 @@ from distutils.core import setup
 setup(name="fastscan",
       version="alpha",
       author="ssem",
-      scripts=[],
+      scripts=["bin/fastscan"],
       packages=["fastscan"],)

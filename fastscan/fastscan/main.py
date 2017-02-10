@@ -13,9 +13,12 @@ class Main:
         self.country_lookup = Country_Lookup()
         self.scan_server = Scan_Server()
         self.banners = Helper_Class()
+        self.mass_output = ""
 
     def _finger_print(self):
-        f = open(self._temp_output, 'r')
+        while not os.path.exists(self.mass_output):
+            time.sleep(1)
+        f = open(self.mass_output, 'r')
         while True:
             try:
                 line = f.readline()
@@ -29,7 +32,9 @@ class Main:
                     except Exception as e:
                         print "[ERROR] %s" % e
                 else:
-                    if status is not None:break
+                    if status is not None:
+                        f.close()
+                        break
                     time.sleep(.1)
             except KeyboardInterrupt:return
             except Exception as e:
@@ -37,8 +42,8 @@ class Main:
 
     def run(self, range_dir, port_file, rate, iface, output):
         self.country_lookup.add_range_dir(range_dir)
-        moutput = "%s_masscan" % output
-        self.scan_server.scan(range_dir, port_file, rate, iface, moutput)
+        self.mass_output = "%s_masscan" % output
+        self.scan_server.scan(range_dir, port_file, rate, iface, self.mass_output)
         f = open(output, 'w+')
         for result in self._finger_print():
             try:f.write("%s\n" % json.dumps(result))

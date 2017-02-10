@@ -89,8 +89,11 @@ class Country_Lookup:
         sys.stdout.write('\033[92m[+]\033[1;m Loaded: %s\n' % os.path.basename(range_file))
 
     def add_range_dir(self, range_dir):
-        for f in os.listdir(range_dir):
-            self.add_range_file(os.path.join(range_dir, f))
+        try:
+            for f in os.listdir(range_dir):
+                self.add_range_file(os.path.join(range_dir, f))
+        except OSError:
+            exit("[ERROR] not a directory %s" % range_dir)
 
     def _recursive_find(self, ip, curser):
         if ip < curser.lower and curser._left != None:
