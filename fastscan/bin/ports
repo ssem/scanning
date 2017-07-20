@@ -1,8 +1,8 @@
 #0       # honeypots
 #19      # chargen_probe
-#21      # ftp
+21      # ftp
 #22      # ssh
-23      # telnet
+#23      # telnet
 #25      # smtp
 #80      # http
 #81      # mcafee

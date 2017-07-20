@@ -13,7 +13,7 @@ class Parent():
     def __init__(self):
         pass
 
-    def run(self, ip, port, timeout=0.5):
+    def run(self, ip, port, timeout=10):
         result = {"ip": ip,
                   "port": port,
                   "banner": "",
@@ -22,15 +22,21 @@ class Parent():
                   "time": time.time()}
         try:
             result["banner"] = self.get_banner(ip, port, timeout)
-            exploit, category = self.check_banner(banner)
+            exploit, category = self.check_banner(result["banner"])
             result["exploit"] = exploit
             result["category"] = category
-        except:
-            pass
+        except Exception as e:
+            sys.stdout.write(repr(e))
+            sys.stdout.write("\n[Error] run\n")
         return result
 
-    def get_banner(self, ip, port, timeout=10):
-        raise Exception('Not Implemented')
+    def get_banner(self, ip, port, timeout=2):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #s.settimeout(int(timeout))
+        s.connect((ip, int(port)))
+        banner = s.recv(4096)
+        s.close()
+        return banner
 
     def check_banner(self, banner):
         raise Exception('Not Implemented')
@@ -38,7 +44,7 @@ class Parent():
 class HoneyPot(Parent):
     default_port = 0
 
-    def get_banner(self, ip, port, timeout=10):
+    def get_banner(self, ip, port, timeout=2):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(int(timeout))
         s.connect((ip, int(port)))
@@ -53,7 +59,7 @@ class HoneyPot(Parent):
 class Chargen(Parent):
     default_port = 19
 
-    def get_banner(self, ip, port, timeout=10):
+    def get_banner(self, ip, port, timeout=2):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(int(timeout))
         s.connect((ip, int(port)))
@@ -66,14 +72,6 @@ class Chargen(Parent):
 
 class Ftp(Parent):
     default_port = 21
-
-    def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
 
     def check_banner(self, banner):
         if "ProFTPD 1.3" in banner:
@@ -150,14 +148,6 @@ class Ftp(Parent):
 class Ssh(Parent):
     default_port = 22
 
-    def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
-
     def check_banner(self, banner):
         if 'Tectia Server' in banner:
             return 'OSVDB 88103', ["ssh", "linux", "metasploit"]
@@ -177,14 +167,6 @@ class Ssh(Parent):
 class Telnet(Parent):
     default_port = 23
 
-    def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
-
     def check_banner(self, banner):
         if 'FreeBSD/' in banner:
             return 'OSVDB 78020', ["telnet", "linux", "metasploit"]
@@ -201,14 +183,6 @@ class Telnet(Parent):
 
 class Smtp(Parent):
     default_port = 25
-
-    def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
 
     def check_banner(self, banner):
         if 'Exim' in banner:
@@ -253,7 +227,7 @@ class Smtp(Parent):
 class Http(Parent):
     default_port = 80
 
-    def get_banner(self, ip, port, timeout=10):
+    def get_banner(self, ip, port, timeout=2):
         banner = ''
         r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
         for field in r.headers:
@@ -497,14 +471,6 @@ class Mcafee(Http):
 class Remote_Telnet(Parent):
     default_port = 107
 
-    def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
-
     def check_banner(self, banner):
         if 'FreeBSD/' in banner:
             return 'OSVDB 78020', ["telnet", "linux", "metasploit"]
@@ -528,7 +494,7 @@ class Imap(Smtp):
 class Https(Http):
     default_port = 443
 
-    def get_banner(self, ip, port, timeout=10):
+    def get_banner(self, ip, port, timeout=2):
         banner = ''
         r = requests.get(
             url='https://%s:%s' % (ip, port),
@@ -572,7 +538,7 @@ class Cups(Http):
 #class Rsync(Parent):
 #    default_port = 873
 
-#    def get_banner(self, ip, port, timeout=10):
+#    def get_banner(self, ip, port, timeout=2):
 #        try:
 #            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #            s.settimeout(int(timeout))
@@ -586,7 +552,7 @@ class Cups(Http):
 #class Vmauthd(Parent):
 #    default_port = 902
 #
-#    def get_banner(self, ip, port, timeout=10):
+#    def get_banner(self, ip, port, timeout=2):
 #        try:
 #            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #            s.settimeout(int(timeout))
@@ -637,14 +603,6 @@ class Cups(Http):
 
 class GoodTech(Parent):
     default_port = 2380
-
-    def get_banner(self, ip, port, timeout):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
 
     def check_banner(self, banner):
         if 'Welcome to GoodTech' in banner:
@@ -748,7 +706,7 @@ class GlassFish(Http):
 #class Vnc(Parent):
 #    default_port = 5900
 #
-#    def get_banner(self, ip, port, timeout=10):
+#    def get_banner(self, ip, port, timeout=2):
 #        try:
 #            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #            s.settimeout(int(timeout))
@@ -775,14 +733,6 @@ class GlassFish(Http):
 
 class vsftp(Parent):
     default_port = 6200
-
-    def get_banner(self, ip, port, timeout):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.connect((ip, int(port)))
-        banner = s.recv(4096)
-        s.close()
-        return banner
 
     def check_banner(self, banner):
         if "(vsFTPd 2.3.4)" in banner:

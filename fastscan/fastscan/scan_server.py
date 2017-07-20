@@ -47,7 +47,7 @@ class Scan_Server:
         print '--rate', rate,
         print '-e', iface,
         print '-oL', output,
-        print '--connection-timeout', '100'
+        print '--connection-timeout', '5'
         self._process = subprocess.Popen(['masscan',
             '--exclude', '255.255.255.255',
             '-p', ports,

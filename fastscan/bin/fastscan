@@ -7,8 +7,21 @@ if __name__ == "__main__":
     parser.add_argument("range_dir", help="directory of ranges")
     parser.add_argument("port_file", help="file of port numbers")
     parser.add_argument("output", help="output file")
-    parser.add_argument("--rate", default=100, help="ip per sec(DEFAULT: 100)")
-    parser.add_argument("--iface", default="eth0", help="network interface")
+    parser.add_argument("-r", "--rate", default=100, help="ip per sec(DEFAULT: 100)")
+    parser.add_argument("-i", "--iface", default="eth0", help="network interface")
+    parser.add_argument("-v", "--verbose", action="store_true",
+        help="verbose output")
+    parser.add_argument("-b", "--banner", action="store_true",
+        help="perform additional banner grab")
+    parser.add_argument("-f", "--ftpwalk", action="store_true",
+        help="perform additional ftpwalk")
     args = parser.parse_args()
+    flags = []
+    if args.verbose:
+        flags.append("verbose")
+    if args.banner:
+        flags.append("banner")
+    if args.ftpwalk:
+        flags.append("ftpwalk")
     main = Main()
-    main.run(args.range_dir, args.port_file, int(args.rate), args.iface, args.output)
+    main.run(args.range_dir, args.port_file, int(args.rate), args.iface, args.output, flags)

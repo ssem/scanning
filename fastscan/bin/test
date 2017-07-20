@@ -1,0 +1,21 @@
+#!/bin/bash
+# INSTALL
+CWD=$PWD
+cd /home/ssem/tools/scanning/fastscan/
+sudo python setup.py install
+cd $CWD
+
+# REMOVE STALE RESULTS
+rm -r output output_masscan
+
+# CREATE DEPS
+mkdir -p test_ips
+echo "112.127.71.208-112.127.71.212" > test_ips/test
+nc -l -p 23 &
+
+# RUN
+./fastscan test_ips ports output -v -b -f
+
+# REMOVE DEPS
+rm -r test_ips
+killall nc
