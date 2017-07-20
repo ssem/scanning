@@ -30,16 +30,20 @@ class Parent():
             sys.stdout.write("\n[Error] run\n")
         return result
 
-    def get_banner(self, ip, port, timeout=2):
+    def get_banner(self, ip, port, timeout=10):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #s.settimeout(int(timeout))
+        s.settimeout(int(timeout))
+        s.setblocking(1)
         s.connect((ip, int(port)))
         banner = s.recv(4096)
         s.close()
         return banner
 
     def check_banner(self, banner):
-        raise Exception('Not Implemented')
+        return 'Not Implemented', 'Not Implemented'
+
+class Default(Parent):
+    default_port = 999999
 
 class HoneyPot(Parent):
     default_port = 0
@@ -47,6 +51,7 @@ class HoneyPot(Parent):
     def get_banner(self, ip, port, timeout=2):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(int(timeout))
+        s.setblocking(1)
         s.connect((ip, int(port)))
         s.send('/')
         banner = s.recv(100)
@@ -62,6 +67,7 @@ class Chargen(Parent):
     def get_banner(self, ip, port, timeout=2):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(int(timeout))
+        s.setblocking(1)
         s.connect((ip, int(port)))
         banner = s.recv(10)
         s.close()

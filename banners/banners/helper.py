@@ -22,5 +22,7 @@ class Helper_Class:
                 yield result
 
     def scan_port(self, ip, port, timeout=.5):
-        module = self.modules[int(port)]
+        try:module = self.modules[int(port)]
+        except KeyError:
+            module = self.modules[999999]
         return module.run(ip, port, timeout)
