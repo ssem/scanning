@@ -1,0 +1,26 @@
+#!/usr/bin/python
+import sys
+import argparse
+from ftpwalk.main import Ftpwalk
+
+
+def scan(ip, port, verbose, output):
+    ftpwalk = Ftpwalk(verbose)
+    result = ftpwalk.run(ip, port)
+    output.write("%s\n" % result)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="ftpwalk an ip")
+    parser.add_argument("ip", help="ip address of target")
+    parser.add_argument("-p", "--port", default=21, help="port address to scan")
+    parser.add_argument("-o", "--outfile", help="output file")
+    parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
+    args = parser.parse_args()
+    if args.outfile:
+        output = open(args.outfile, "w+")
+    else:
+        output = sys.stdout
+    try:scan(args.ip, args.port, args.verbose, output)
+    except KeyboardInterrupt:
+        exit("bye")
+
