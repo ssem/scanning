@@ -13,7 +13,7 @@ class Parent():
     def __init__(self):
         pass
 
-    def run(self, ip, port, timeout=10):
+    def run(self, ip, port, timeout=5):
         result = {"ip": ip,
                   "port": port,
                   "banner": "",
@@ -26,21 +26,19 @@ class Parent():
             result["exploit"] = exploit
             result["category"] = category
         except Exception as e:
-            sys.stdout.write(repr(e))
+            result["error"] = repr(e)
+            sys.stdout.write(result["error"])
             sys.stdout.write("\n[Error] run\n")
         return result
 
-    def get_banner(self, ip, port, timeout=10):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.setblocking(1)
-        s.connect((ip, int(port)))
+    def get_banner(self, ip, port, timeout=5):
+        s = socket.create_connection((ip, port), timeout)
         banner = s.recv(4096)
         s.close()
         return banner
 
     def check_banner(self, banner):
-        return 'Not Implemented', 'Not Implemented'
+        return 'Not Implemented', []
 
 class Default(Parent):
     default_port = 999999
@@ -49,10 +47,7 @@ class HoneyPot(Parent):
     default_port = 0
 
     def get_banner(self, ip, port, timeout=2):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.setblocking(1)
-        s.connect((ip, int(port)))
+        s = socket.create_connection((ip, port), timeout)
         s.send('/')
         banner = s.recv(100)
         s.close()
@@ -65,10 +60,7 @@ class Chargen(Parent):
     default_port = 19
 
     def get_banner(self, ip, port, timeout=2):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(int(timeout))
-        s.setblocking(1)
-        s.connect((ip, int(port)))
+        s = socket.create_connection((ip, port), timeout)
         banner = s.recv(10)
         s.close()
         return banner
@@ -234,8 +226,17 @@ class Http(Parent):
     default_port = 80
 
     def get_banner(self, ip, port, timeout=2):
+        try:
+            r = requests.get(url='http://%s:%s' % (ip, port),
+                             verify=False,
+                             timeout=float(timeout))
+        except request.exceptions.SSLError:
+            try:
+                r = requests.get(url='https://%s:%s' % (ip, port),
+                                 verify=False,
+                                 timeout=float(timeout))
+            except Exception as e: return e
         banner = ''
-        r = requests.get('http://%s:%s' % (ip, port), timeout=float(timeout))
         for field in r.headers:
             banner += '%s: %s\n' % (field, r.headers[field])
         banner += r.content[:100]
@@ -500,16 +501,7 @@ class Imap(Smtp):
 class Https(Http):
     default_port = 443
 
-    def get_banner(self, ip, port, timeout=2):
-        banner = ''
-        r = requests.get(
-            url='https://%s:%s' % (ip, port),
-            verify=False,
-            timeout=float(timeout))
-        for field in r.headers:
-            banner += '%s:%s\n' % (field, r.headers[field])
-        banner += r.content[:100]
-        return banner
+    # SAME AS HTTP
 
 #class Smb(Parent):
 #    default_port = 445

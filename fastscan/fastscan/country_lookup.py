@@ -105,10 +105,11 @@ class Country_Lookup:
                 return self._recursive_find(ip, curser._right)
 
     def find(self, ip):
-        ip = int(struct.unpack('!I', socket.inet_aton(ip))[0])
-        if self.binary_tree is not None:
-            try:return self._recursive_find(ip, self.binary_tree).country
-            except:return 'unknown'
+        try:
+            ip = int(struct.unpack('!I', socket.inet_aton(ip))[0])
+            if self.binary_tree is not None:
+                return self._recursive_find(ip, self.binary_tree).country
+        except:return 'unknown'
 
     def _recursive_print_tree(self, node, depth=0):
         if node is not None:

@@ -48,6 +48,8 @@ class Main:
                           'port': port,
                           'time': time.time(),
                           'country': self.country_lookup.find(ip)}
+                if "verbose" in flags:
+                    print result
                 if "banner" in flags:
                     try:
                         tmp = self.banners.scan_port(ip, port)
@@ -55,18 +57,14 @@ class Main:
                         result["exploit"] = tmp["exploit"]
                         result["category"] = tmp["category"]
                     except Exception as e:
-                        if "verbose" in flags:
-                            sys.stdout.write(repr(e))
-                            sys.stdout.write("\n[ERROR] Banner\n")
+                        sys.stdout.write("%s\n[ERROR] Banner\n" % e)
                 if "ftpwalk" in flags:
                     try:
                         pass
                         #tmp = self.ftpwalk.scan_port(ip, port)
                         #result =
                     except Exception as e:
-                        if "verbose" in flags:
-                            sys.stdout.write(repr(e))
-                            sys.stdout.write("\n[ERROR] ftpwalk\n")
+                        sys.stdout.write("%s\n[ERROR] ftpwalk\n" % e)
                 if "verbose" in flags:
                     print result
                 yield result
