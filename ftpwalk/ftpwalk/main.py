@@ -80,7 +80,7 @@ class Ftpwalk():
                 results.append(fullpath)
         return results
 
-    def run(self, ip, port, timeout=5):
+    def scan_port(self, ip, port, timeout=5):
         result = {"ip": ip,
                   "port": port,
                   "user": "",
@@ -92,6 +92,7 @@ class Ftpwalk():
             result["user"] = user
             result["password"] = password
             result["files"] = self.get_files()
+        except KeyboardInterrupt as e:raise(e)
         except Exception as e:
             result["error"] = repr(e)
             sys.stdout.write(result["error"])

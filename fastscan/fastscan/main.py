@@ -4,6 +4,8 @@ import time
 import json
 import inspect
 import tempfile
+from ftpwalk.main import Ftpwalk
+from brutetelnet.main import Brutetelnet
 from banners.helper import Helper_Class
 from fastscan.scan_server import Scan_Server
 from fastscan.country_lookup import Country_Lookup
@@ -14,6 +16,8 @@ class Main:
         self.country_lookup = Country_Lookup()
         self.scan_server = Scan_Server()
         self.banners = Helper_Class()
+        self.ftpwalk = Ftpwalk()
+        self.btelnet = Brutetelnet()
         self.mass_output = ""
         self.already_scanned = {}
         self.last_check=False
@@ -60,11 +64,19 @@ class Main:
                         sys.stdout.write("%s\n[ERROR] Banner\n" % e)
                 if "ftpwalk" in flags:
                     try:
-                        pass
-                        #tmp = self.ftpwalk.scan_port(ip, port)
-                        #result =
+                        tmp = self.ftpwalk.scan_port(ip, port)
+                        result["ftp user"] = tmp["user"]
+                        result["ftp password"] = tmp["password"]
+                        result["files"] = tmp["files"]
                     except Exception as e:
                         sys.stdout.write("%s\n[ERROR] ftpwalk\n" % e)
+                if "telnet" in flags:
+                    try:
+                        tmp = self.btelnet.scan_port(ip, port)
+                        result["telnet user"] = tmp["user"]
+                        result["telnet password"] = tmp["password"]
+                    except Exception as e:
+                        sys.stdout.write("%s\n[ERROR] telnet\n" % e)
                 if "verbose" in flags:
                     print result
                 yield result
