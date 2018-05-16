@@ -230,7 +230,7 @@ class Http(Parent):
             r = requests.get(url='http://%s:%s' % (ip, port),
                              verify=False,
                              timeout=float(timeout))
-        except request.exceptions.SSLError:
+        except requests.exceptions.SSLError:
             try:
                 r = requests.get(url='https://%s:%s' % (ip, port),
                                  verify=False,

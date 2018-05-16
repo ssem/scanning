@@ -75,6 +75,7 @@ class Main:
                         tmp = self.btelnet.scan_port(ip, port)
                         result["telnet user"] = tmp["user"]
                         result["telnet password"] = tmp["password"]
+                        result["telnet response"] = tmp["login response"]
                     except Exception as e:
                         sys.stdout.write("%s\n[ERROR] telnet\n" % e)
                 if "verbose" in flags:
