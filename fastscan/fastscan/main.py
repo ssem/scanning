@@ -75,7 +75,7 @@ class Main:
                 if "telnet" in flags:
                     try:
                         tmp = self.bruteforce.run(ip, port, "telnet", self.users, 
-                                                  self.passwords, "3", "30")
+                                                  self.passwords, "16", "3", "30")
                         result["telnet user"] = tmp["login"]
                         result["telnet password"] = tmp["password"]
                     except Exception as e:
