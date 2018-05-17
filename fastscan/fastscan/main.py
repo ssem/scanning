@@ -50,12 +50,11 @@ class Main:
         while not os.path.exists(self.mass_output):time.sleep(1)
         while self._is_masscan_running():
             for ip, port in self._get_ip_and_port():
+                print "fingerprint: %s" % ip
                 result = {'ip': ip,
                           'port': port,
                           'time': time.time(),
                           'country': self.country_lookup.find(ip)}
-                if "verbose" in flags:
-                    print result
                 if "banner" in flags:
                     try:
                         tmp = self.banners.scan_port(ip, port)
@@ -80,8 +79,7 @@ class Main:
                         result["telnet password"] = tmp["password"]
                     except Exception as e:
                         sys.stdout.write("%s\n[ERROR] telnet\n" % e)
-                if "verbose" in flags:
-                    print result
+                print result
                 yield result
             time.sleep(2)
 
