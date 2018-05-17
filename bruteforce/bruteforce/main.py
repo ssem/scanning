@@ -21,7 +21,7 @@ class Bruteforce:
             return json.dumps(obj["results"][0])
         except:pass
         fh.close()
-        return None
+        return {"login": "", "password": ""}
 
     def run(self, target, port, proto, userfile, passfile, parallel="16", 
                   connection_timeout="3", total_timeout="9999999"):
