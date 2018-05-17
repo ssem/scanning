@@ -27,7 +27,7 @@ class Bruteforce:
                   connection_timeout="3", total_timeout="9999999"):
         cmd = ["hydra", target, "-s", port, "-o", self.output, "-L", userfile, 
                "-P", passfile, "-b", "json", "-w", connection_timeout, 
-               "-e", "ns", "-u", "-f", "-t", parallel, proto]
+               "-I", "-e", "ns", "-u", "-f", "-t", parallel, proto]
         p = Popen(cmd,)# stdout=PIPE, stderr=PIPE) 
         start = time.time()
         total_timeout = int(total_timeout)
