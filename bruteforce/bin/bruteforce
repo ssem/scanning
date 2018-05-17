@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+import argparse
+from bruteforce.main import Bruteforce
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="hydra wrapper")
+    parser.add_argument("ip", help="target ip")
+    parser.add_argument("port", help="target port")
+    parser.add_argument("protocol", help="target protocol (ex. ssh)")
+    parser.add_argument("userFile", help="file containing users")
+    parser.add_argument("passFile", help="file containing passwords")
+    parser.add_argument("-p", default="16", help="parrel connection attempts (default:16)")
+    parser.add_argument("-c", default="3", help="connection timeout (default:3sec)")
+    parser.add_argument("-t", default="9999999", help="total timeout (default:115days)")
+    args = parser.parse_args()
+    bf = Bruteforce()
+    result = bf.run(args.ip, args.port, args.protocol, args.userFile, 
+                    args.passFile, args.p, args.c, args.t) 
+    print result
