@@ -95,6 +95,4 @@ class Ftpwalk():
         except KeyboardInterrupt as e:raise(e)
         except Exception as e:
             result["error"] = repr(e)
-            sys.stdout.write(result["error"])
-            sys.stdout.write("\n[Error] run\n")
         return result

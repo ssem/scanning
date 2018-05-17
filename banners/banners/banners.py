@@ -27,8 +27,6 @@ class Parent():
             result["category"] = category
         except Exception as e:
             result["error"] = repr(e)
-            sys.stdout.write(result["error"])
-            sys.stdout.write("\n[Error] run\n")
         return result
 
     def get_banner(self, ip, port, timeout=5):
